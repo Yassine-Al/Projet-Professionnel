@@ -1,3 +1,5 @@
+import Formlogin from "../components/Formlogin";
+
 export default function Login() {
     return (
         <div>
@@ -12,6 +14,8 @@ export default function Login() {
                 <br />
                 Enfin un footer
             </p>
+                <br /><br /><br />
+            <Formlogin/>
         </div>
     )
 }

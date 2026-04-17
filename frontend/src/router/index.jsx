@@ -6,6 +6,8 @@ import Marketplace from "../pages/Marketplace";
 import Predict from "../pages/Predict";
 import Layout from "../layouts/Layout";
 
+export const User_Dashboard = '/User/dashboard'
+
 export const router = createBrowserRouter([
     {
         element: <Layout />,
@@ -17,6 +19,10 @@ export const router = createBrowserRouter([
             {
                 path: "/Login",
                 element: <Login />,
+            },
+            {
+                path: "/User/Dashboard",
+                element: <p>Bonjour chere client</p>,
             },
             {
                 path: "/Register",
