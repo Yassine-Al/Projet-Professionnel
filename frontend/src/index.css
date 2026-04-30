@@ -1,3 +1,271 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+/* ── ZXMOTO Design System ──────────────────────────────── */
+:root {
+  --brand-blue: #5881BC;
+  --accent-blue: #007BFF;
+  --accent-hover: #0056CC;
+  --accent-active: #003D99;
+  --secondary: #343A40;
+  --secondary-hover: #23272B;
+  --error: #DC3545;
+  --warning: #FFC107;
+  --success: #28A745;
+  --text-primary: #000000;
+  --text-secondary: #333333;
+  --text-muted: #555555;
+  --text-faint: #888888;
+  --bg-white: #FFFFFF;
+  --bg-off: #F7F7F7;
+  --bg-lightest: #FAFAFA;
+  --border: #6C757D;
+  --bg-dark: #1B1B1B;
+  --shadow-1: 0px 2px 4px rgba(0,0,0,0.1);
+  --shadow-2: 0px 4px 8px rgba(0,0,0,0.15);
+  --shadow-3: 0px 8px 16px rgba(0,0,0,0.2);
+  --shadow-4: 0px 12px 24px rgba(0,0,0,0.25);
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 22.5px;
+    font-weight: 400;
+    color: var(--text-primary);
+    background-color: var(--bg-white);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 { font-size: 40px; font-weight: 700; line-height: 48px; letter-spacing: -0.3px; }
+  h2 { font-size: 36px; font-weight: 700; line-height: 43.2px; letter-spacing: -0.2px; }
+  h3 { font-size: 32px; font-weight: 700; line-height: 38.4px; letter-spacing: -0.1px; }
+  h4 { font-size: 24px; font-weight: 700; line-height: 28.8px; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-off); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+}
+
+@layer components {
+  /* ── Buttons ── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--accent-blue);
+    color: #FFFFFF;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 0 32px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 0;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background-color: var(--accent-hover); }
+  .btn-primary:active { background-color: var(--accent-active); }
+  .btn-primary:disabled { background-color: var(--border); opacity: 0.6; cursor: not-allowed; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: var(--secondary);
+    color: #FFFFFF;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 0 32px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 0;
+    border: 1px solid var(--secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+  }
+  .btn-secondary:hover { background-color: var(--secondary-hover); border-color: var(--secondary-hover); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 0;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 0;
+    border: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { color: var(--brand-blue); text-decoration: underline; }
+
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: transparent;
+    color: var(--accent-blue);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    padding: 0 32px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 0;
+    border: 1px solid var(--accent-blue);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+  }
+  .btn-outline:hover { background-color: var(--accent-blue); color: #FFFFFF; }
+
+  /* ── Cards ── */
+  .card {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 32px;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s ease;
+  }
+  .card:hover { box-shadow: var(--shadow-1); }
+
+  .card-section {
+    background-color: var(--bg-off);
+    border: none;
+    border-radius: 0;
+    padding: 40px 32px;
+  }
+
+  /* ── Inputs ── */
+  .input-field {
+    width: 100%;
+    height: 60px;
+    padding: 16px 12px;
+    background-color: var(--bg-white);
+    color: var(--text-secondary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input-field::placeholder { color: var(--text-faint); }
+  .input-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+  .input-field:disabled { background-color: var(--bg-off); color: var(--text-faint); cursor: not-allowed; }
+
+  .select-field {
+    width: 100%;
+    height: 60px;
+    padding: 16px 12px;
+    background-color: var(--bg-white);
+    color: var(--text-secondary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    transition: border-color 0.15s ease;
+  }
+  .select-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+
+  .textarea-field {
+    width: 100%;
+    padding: 16px 12px;
+    background-color: var(--bg-white);
+    color: var(--text-secondary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    outline: none;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.15s ease;
+  }
+  .textarea-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+  .textarea-field::placeholder { color: var(--text-faint); }
+
+  /* ── Badges ── */
+  .badge-primary { background: var(--accent-blue); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+  .badge-success { background: var(--success); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+  .badge-warning { background: var(--warning); color: #000; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+  .badge-danger  { background: var(--error);   color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+  .badge-dark    { background: var(--secondary); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+  .badge-brand   { background: var(--brand-blue); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
+
+  /* ── Nav link ── */
+  .nav-link {
+    color: var(--text-primary);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 80px;
+    padding: 0 12px;
+    text-decoration: none;
+    display: inline-block;
+    height: 80px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav-link:hover { color: var(--brand-blue); }
+  .nav-link.active { color: var(--brand-blue); border-bottom-color: var(--brand-blue); }
+
+  /* ── Form label ── */
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  /* ── Section container ── */
+  .container { max-width: 1440px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 1023px) { .container { padding: 0 20px; } }
+  @media (max-width: 767px)  { .container { padding: 0 16px; } }
+}
+
+/* ── Animations ── */
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.anim-fade    { animation: fadeIn  0.4s ease both; }
+.anim-up      { animation: slideUp 0.5s ease both; }
+.anim-up-1    { animation: slideUp 0.5s 0.1s ease both; }
+.anim-up-2    { animation: slideUp 0.5s 0.2s ease both; }
+.anim-up-3    { animation: slideUp 0.5s 0.3s ease both; }
+.anim-right   { animation: slideInRight 0.5s ease both; }
+.anim-spin    { animation: spin 1s linear infinite; }
