@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const NAV = [
   { label: "Accueil", path: "/" },
@@ -17,7 +17,7 @@ function Logo() {
           <circle cx="7.5" cy="14.5" r="1.5"/><circle cx="16.5" cy="14.5" r="1.5"/>
         </svg>
       </div>
-      <span style={{ fontFamily: "Manrope, sans-serif", fontWeight: 800, fontSize: 20, color: "var(--text-primary)", letterSpacing: "-0.3px" }}>
+      <span style={{ fontFamily: "Manrope, sans-serif", fontWeight: 800, fontSize: 20, color: "#fff", letterSpacing: "-0.3px" }}>
         ocazz<span style={{ color: "var(--accent-blue)" }}>.ma</span>
       </span>
     </Link>
@@ -26,19 +26,39 @@ function Logo() {
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-white)" }}>
       {/* ── Header ── */}
-      <header style={{ position: "sticky", top: 0, zIndex: 100, background: "var(--bg-white)", borderBottom: "1px solid var(--bg-off)", height: 80 }}>
+      <header style={{ 
+        position: "sticky", 
+        top: 0, 
+        zIndex: 100, 
+        background: isScrolled || !isHome ? "rgba(0, 0, 0, 0.9)" : "transparent",
+        backdropFilter: isScrolled || !isHome ? "blur(10px)" : "none",
+        transition: "background 0.3s ease, backdrop-filter 0.3s ease",
+        borderBottom: "none", 
+        height: 80 
+      }}>
         <div className="container" style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Logo />
 
           {/* Desktop Nav */}
           <nav style={{ display: "flex", alignItems: "center" }} className="hide-mobile">
             {NAV.map(({ label, path }) => (
-              <Link key={label} to={path} className={`nav-link ${location.pathname === path ? "active" : ""}`}>
+              <Link key={label} to={path} className={`nav-link ${location.pathname === path ? "active" : ""}`} style={{ color: location.pathname === path ? "var(--brand-blue)" : "#fff" }}>
                 {label}
               </Link>
             ))}
@@ -46,7 +66,7 @@ export default function Layout() {
 
           {/* Auth */}
           <div style={{ display: "flex", gap: 12, alignItems: "center" }} className="hide-mobile">
-            <Link to="/Login" className="btn-ghost" style={{ height: 44, lineHeight: "44px", padding: "0 16px", fontSize: 15 }}>
+            <Link to="/Login" className="btn-ghost" style={{ height: 44, lineHeight: "44px", padding: "0 16px", fontSize: 15, color: "#fff" }}>
               Connexion
             </Link>
             <Link to="/Register" className="btn-primary" style={{ height: 44, lineHeight: "44px", padding: "0 24px", fontSize: 15 }}>
@@ -55,7 +75,7 @@ export default function Layout() {
           </div>
 
           {/* Hamburger */}
-          <button onClick={() => setOpen(!open)} style={{ display: "none", width: 44, height: 44, background: "none", border: "none", cursor: "pointer", alignItems: "center", justifyContent: "center" }} className="show-mobile-flex">
+          <button onClick={() => setOpen(!open)} style={{ display: "none", width: 44, height: 44, background: "none", border: "none", cursor: "pointer", alignItems: "center", justifyContent: "center", color: "#fff" }} className="show-mobile-flex">
             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {open
                 ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
@@ -66,10 +86,10 @@ export default function Layout() {
 
         {/* Mobile menu */}
         {open && (
-          <div style={{ background: "var(--bg-white)", borderTop: "1px solid var(--bg-off)", padding: "16px 16px 24px" }} className="anim-fade">
+          <div style={{ background: "#000", borderTop: "1px solid #333", padding: "16px 16px 24px" }} className="anim-fade">
             {NAV.map(({ label, path }) => (
               <Link key={label} to={path} onClick={() => setOpen(false)}
-                style={{ display: "block", padding: "14px 0", color: location.pathname === path ? "var(--brand-blue)" : "var(--text-primary)", fontWeight: location.pathname === path ? 600 : 400, fontSize: 17, textDecoration: "none", borderBottom: "1px solid var(--bg-off)" }}>
+                style={{ display: "block", padding: "14px 0", color: location.pathname === path ? "var(--brand-blue)" : "#fff", fontWeight: location.pathname === path ? 600 : 400, fontSize: 17, textDecoration: "none", borderBottom: "1px solid #333" }}>
                 {label}
               </Link>
             ))}

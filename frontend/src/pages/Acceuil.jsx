@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import cutteryt from "../assets/cutteryt.mp4";
 
 const FEATURED = [
   { id:1, year:2021, make:"Dacia", model:"Duster Prestige", price:148000, mileage:42000, fuel:"Diesel", city:"Casablanca", tag:"En vedette", img:"https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop&q=80" },
@@ -55,19 +56,39 @@ export default function Acceuil() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+        } else {
+          entry.target.classList.remove("in-view");
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll(".scroll-section").forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div>
       {/* ── Hero ── */}
-      <section style={{ position: "relative", minHeight: "90vh", display: "flex", alignItems: "center", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden" }}>
-          <iframe 
-            src="https://www.youtube.com/embed/YAFUyPp_238?autoplay=1&mute=1&controls=0&loop=1&playlist=YAFUyPp_238&playsinline=1&rel=0&showinfo=0"
-            frameBorder="0"
-            allow="autoplay; encrypted-media"
-            style={{ position: "absolute", top: "50%", left: "50%", width: "100vw", height: "56.25vw", minHeight: "100vh", minWidth: "177.77vh", transform: "translate(-50%, -50%)", pointerEvents: "none" }}
+      <section style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", overflow: "hidden", marginTop: "-80px", paddingTop: "80px" }}>
+        <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "hidden", background: "#000" }}>
+          <video
+            src={cutteryt}
+            autoPlay
+            muted
+            loop
+            playsInline
+            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
           />
         </div>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.2) 100%)" }}/>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%)" }}/>
 
         <div className="container" style={{ position: "relative", paddingTop: 120, paddingBottom: 120 }}>
           <div style={{ maxWidth: 640 }} className="anim-up">
@@ -107,7 +128,7 @@ export default function Acceuil() {
       </section>
 
       {/* ── Quick Search Filters ── */}
-      <section style={{ background: "var(--accent-blue)", padding: "0" }}>
+      <section className="scroll-section" style={{ background: "var(--accent-blue)", padding: "0" }}>
         <div className="container" style={{ display: "flex", gap: 0, overflowX: "auto" }}>
           {BRANDS.map(b => (
             <Link key={b} to={`/Marketplace?make=${b}`}
@@ -121,7 +142,7 @@ export default function Acceuil() {
       </section>
 
       {/* ── Featured Listings ── */}
-      <section style={{ padding: "80px 0", background: "var(--bg-white)" }}>
+      <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-white)" }}>
         <div className="container">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 40 }}>
             <div>
@@ -139,7 +160,7 @@ export default function Acceuil() {
       </section>
 
       {/* ── Trust Section ── */}
-      <section style={{ padding: "80px 0", background: "var(--bg-off)" }}>
+      <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-off)" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: 52 }}>
             <p style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>Pourquoi ocazz.ma</p>
@@ -163,7 +184,7 @@ export default function Acceuil() {
       </section>
 
       {/* ── AI Estimator CTA ── */}
-      <section style={{ padding: "80px 0", background: "var(--bg-white)" }}>
+      <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-white)" }}>
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, border: "1px solid var(--border)" }} className="responsive-grid">
             <div style={{ background: "var(--accent-blue)", padding: "72px 52px", color: "#fff" }}>
@@ -194,7 +215,7 @@ export default function Acceuil() {
       </section>
 
       {/* ── Sell CTA ── */}
-      <section style={{ padding: "80px 0", background: "var(--bg-dark)" }}>
+      <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-dark)" }}>
         <div className="container" style={{ textAlign: "center" }}>
           <h2 style={{ color: "#fff", margin: "0 0 16px" }}>Prêt à vendre votre voiture ?</h2>
           <p style={{ color: "#888", fontSize: 18, marginBottom: 40, maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>

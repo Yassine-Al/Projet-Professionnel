@@ -226,6 +226,7 @@
 
   /* ── Nav link ── */
   .nav-link {
+    position: relative;
     color: var(--text-primary);
     font-size: 17px;
     font-weight: 400;
@@ -234,12 +235,25 @@
     text-decoration: none;
     display: inline-block;
     height: 80px;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -3px;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 20px;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    background-color: var(--brand-blue);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
   }
   .nav-link:hover { color: var(--brand-blue); }
-  .nav-link.active { color: var(--brand-blue); border-bottom-color: var(--brand-blue); }
+  .nav-link:hover::after {
+    transform: scaleX(1);
+  }
+  .nav-link.active { color: var(--brand-blue); }
 
   /* ── Form label ── */
   .form-label {
@@ -269,3 +283,14 @@
 .anim-up-3    { animation: slideUp 0.5s 0.3s ease both; }
 .anim-right   { animation: slideInRight 0.5s ease both; }
 .anim-spin    { animation: spin 1s linear infinite; }
+
+/* ── Scroll Reveal Animations ── */
+.scroll-section {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.scroll-section.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
