@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
-
 /* ── ZXMOTO Design System ──────────────────────────────── */
 :root {
   --brand-blue: #5881BC;
@@ -34,18 +32,32 @@
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    /* Inter for body — exceptional legibility at all sizes */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 15px;
-    line-height: 22.5px;
+    line-height: 1.6;
     font-weight: 400;
     color: var(--text-primary);
     background-color: var(--bg-white);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  h1 { font-size: 40px; font-weight: 700; line-height: 48px; letter-spacing: -0.3px; }
-  h2 { font-size: 36px; font-weight: 700; line-height: 43.2px; letter-spacing: -0.2px; }
-  h3 { font-size: 32px; font-weight: 700; line-height: 38.4px; letter-spacing: -0.1px; }
-  h4 { font-size: 24px; font-weight: 700; line-height: 28.8px; }
+  /* Manrope for all headings — strong, geometric, premium */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+  h1 { font-size: clamp(32px, 5vw, 56px); }
+  h2 { font-size: clamp(26px, 4vw, 40px); }
+  h3 { font-size: clamp(22px, 3vw, 32px); font-weight: 700; }
+  h4 { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  h5 { font-size: 18px; font-weight: 600; letter-spacing: 0; }
+  h6 { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+  p  { line-height: 1.65; }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: var(--bg-off); }
   ::-webkit-scrollbar-thumb { background: var(--border); }
@@ -61,11 +73,13 @@
     background-color: var(--accent-blue);
     color: #FFFFFF;
     font-family: 'Manrope', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     padding: 0 32px;
-    height: 60px;
-    line-height: 60px;
+    height: 52px;
+    line-height: 52px;
     border-radius: 0;
     border: none;
     cursor: pointer;
@@ -84,11 +98,13 @@
     background-color: var(--secondary);
     color: #FFFFFF;
     font-family: 'Manrope', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     padding: 0 32px;
-    height: 60px;
-    line-height: 60px;
+    height: 52px;
+    line-height: 52px;
     border-radius: 0;
     border: 1px solid var(--secondary);
     cursor: pointer;
@@ -104,12 +120,12 @@
     gap: 8px;
     background-color: transparent;
     color: var(--text-primary);
-    font-family: 'Manrope', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
     padding: 0;
-    height: 60px;
-    line-height: 60px;
+    height: 52px;
+    line-height: 52px;
     border-radius: 0;
     border: none;
     cursor: pointer;
@@ -126,11 +142,13 @@
     background-color: transparent;
     color: var(--accent-blue);
     font-family: 'Manrope', sans-serif;
-    font-size: 15px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     padding: 0 32px;
-    height: 60px;
-    line-height: 60px;
+    height: 52px;
+    line-height: 52px;
     border-radius: 0;
     border: 1px solid var(--accent-blue);
     cursor: pointer;
@@ -160,30 +178,30 @@
   /* ── Inputs ── */
   .input-field {
     width: 100%;
-    height: 60px;
-    padding: 16px 12px;
+    height: 52px;
+    padding: 0 14px;
     background-color: var(--bg-white);
     color: var(--text-secondary);
-    font-family: 'Manrope', sans-serif;
-    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
     font-weight: 400;
     border: 1px solid var(--border);
     border-radius: 0;
     outline: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  .input-field::placeholder { color: var(--text-faint); }
-  .input-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+  .input-field::placeholder { color: var(--text-faint); font-style: italic; }
+  .input-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
   .input-field:disabled { background-color: var(--bg-off); color: var(--text-faint); cursor: not-allowed; }
 
   .select-field {
     width: 100%;
-    height: 60px;
-    padding: 16px 12px;
+    height: 52px;
+    padding: 0 14px;
     background-color: var(--bg-white);
     color: var(--text-secondary);
-    font-family: 'Manrope', sans-serif;
-    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
     font-weight: 400;
     border: 1px solid var(--border);
     border-radius: 0;
@@ -196,16 +214,17 @@
     background-position: right 16px center;
     transition: border-color 0.15s ease;
   }
-  .select-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
+  .select-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
 
   .textarea-field {
     width: 100%;
-    padding: 16px 12px;
+    padding: 14px;
     background-color: var(--bg-white);
     color: var(--text-secondary);
-    font-family: 'Manrope', sans-serif;
-    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
     font-weight: 400;
+    line-height: 1.6;
     border: 1px solid var(--border);
     border-radius: 0;
     outline: none;
@@ -213,8 +232,8 @@
     min-height: 120px;
     transition: border-color 0.15s ease;
   }
-  .textarea-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.25); }
-  .textarea-field::placeholder { color: var(--text-faint); }
+  .textarea-field:focus { border: 2px solid var(--accent-blue); box-shadow: 0 0 0 3px rgba(0,123,255,0.15); }
+  .textarea-field::placeholder { color: var(--text-faint); font-style: italic; }
 
   /* ── Badges ── */
   .badge-primary { background: var(--accent-blue); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 0; display: inline-block; }
@@ -228,40 +247,46 @@
   .nav-link {
     position: relative;
     color: var(--text-primary);
-    font-size: 17px;
-    font-weight: 400;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     line-height: 80px;
-    padding: 0 12px;
+    padding: 0 10px;
     text-decoration: none;
     display: inline-block;
     height: 80px;
     transition: color 0.15s;
+    white-space: nowrap;
   }
   .nav-link::after {
     content: '';
     position: absolute;
-    bottom: 20px;
-    left: 12px;
-    right: 12px;
-    height: 3px;
-    background-color: var(--brand-blue);
+    bottom: 18px;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background-color: var(--accent-blue);
     transform: scaleX(0);
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease;
     transform-origin: left;
+    border-radius: 1px;
   }
-  .nav-link:hover { color: var(--brand-blue); }
-  .nav-link:hover::after {
-    transform: scaleX(1);
-  }
-  .nav-link.active { color: var(--brand-blue); }
+  .nav-link:hover { color: var(--accent-blue); }
+  .nav-link:hover::after { transform: scaleX(1); }
+  .nav-link.active { color: var(--accent-blue); font-weight: 600; }
+  .nav-link.active::after { transform: scaleX(1); }
 
   /* ── Form label ── */
   .form-label {
     display: block;
-    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
     font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
   }
 
   /* ── Section container ── */

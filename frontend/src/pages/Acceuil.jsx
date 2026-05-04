@@ -3,25 +3,25 @@ import { Link, useNavigate } from "react-router-dom";
 import cutteryt from "../assets/cutteryt.mp4";
 
 const FEATURED = [
-  { id:1, year:2021, make:"Dacia", model:"Duster Prestige", price:148000, mileage:42000, fuel:"Diesel", city:"Casablanca", tag:"En vedette", img:"https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop&q=80" },
-  { id:2, year:2020, make:"Volkswagen", model:"Golf 8 R-Line", price:210000, mileage:28000, fuel:"Essence", city:"Rabat", tag:"Nouveau", img:"https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&auto=format&fit=crop&q=80" },
-  { id:3, year:2022, make:"BMW", model:"Série 3 320d", price:385000, mileage:15000, fuel:"Diesel", city:"Marrakech", tag:"Premium", img:"https://images.unsplash.com/photo-1580273916550-22f79a72d97d?w=600&auto=format&fit=crop&q=80" },
-  { id:4, year:2019, make:"Renault", model:"Clio 5 Intens", price:98000, mileage:67000, fuel:"Essence", city:"Fès", tag:"Bonne affaire", img:"https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&auto=format&fit=crop&q=80" },
+  { id: 1, year: 2021, make: "Dacia", model: "Duster Prestige", price: 148000, mileage: 42000, fuel: "Diesel", city: "Casablanca", tag: "En vedette", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop&q=80" },
+  { id: 2, year: 2020, make: "Volkswagen", model: "Golf 8 R-Line", price: 210000, mileage: 28000, fuel: "Essence", city: "Rabat", tag: "Nouveau", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&auto=format&fit=crop&q=80" },
+  { id: 3, year: 2022, make: "BMW", model: "Série 3 320d", price: 385000, mileage: 15000, fuel: "Diesel", city: "Marrakech", tag: "Premium", img: "https://images.unsplash.com/photo-1580273916550-22f79a72d97d?w=600&auto=format&fit=crop&q=80" },
+  { id: 4, year: 2019, make: "Renault", model: "Clio 5 Intens", price: 98000, mileage: 67000, fuel: "Essence", city: "Fès", tag: "Bonne affaire", img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&auto=format&fit=crop&q=80" },
 ];
 
-const BRANDS = ["Dacia","Volkswagen","BMW","Renault","Peugeot","Toyota","Mercedes","Hyundai","Ford","Kia"];
+const BRANDS = ["Dacia", "Volkswagen", "BMW", "Renault", "Peugeot", "Toyota", "Mercedes", "Hyundai", "Ford", "Kia"];
 
 const TRUST = [
-  { title:"Annonces vérifiées", desc:"Chaque annonce est contrôlée par notre équipe pour garantir l'authenticité des informations et protéger les acheteurs.", icon:"M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-  { title:"Messagerie sécurisée", desc:"Communiquez directement avec les vendeurs via notre système de messagerie intégré, chiffré et sécurisé.", icon:"M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-  { title:"Estimation par IA", desc:"Notre moteur de Machine Learning analyse le marché marocain en temps réel pour vous donner une estimation de prix précise.", icon:"M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
+  { title: "Annonces vérifiées", desc: "Chaque annonce est contrôlée par notre équipe pour garantir l'authenticité des informations et protéger les acheteurs.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
+  { title: "Messagerie sécurisée", desc: "Communiquez directement avec les vendeurs via notre système de messagerie intégré, chiffré et sécurisé.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+  { title: "Estimation par IA", desc: "Notre moteur de Machine Learning analyse le marché marocain en temps réel pour vous donner une estimation de prix précise.", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
 ];
 
 const STATS = [
-  { val:"12 000+", label:"Annonces actives" },
-  { val:"98%", label:"Taux de satisfaction" },
-  { val:"48h", label:"Délai moyen de vente" },
-  { val:"50k+", label:"Utilisateurs inscrits" },
+  { val: "12 000+", label: "Annonces actives" },
+  { val: "98%", label: "Taux de satisfaction" },
+  { val: "48h", label: "Délai moyen de vente" },
+  { val: "50k+", label: "Utilisateurs inscrits" },
 ];
 
 function CarCard({ car }) {
@@ -32,8 +32,8 @@ function CarCard({ car }) {
       style={{ border: "1px solid var(--border)", background: "var(--bg-white)", transition: "box-shadow 0.2s ease" }}>
       <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
         <img className="card-img" src={car.img} alt={`${car.make} ${car.model}`}
-          style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}/>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }}/>
+          style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }} />
         <span className="badge-primary" style={{ position: "absolute", top: 12, left: 12 }}>{car.tag}</span>
         <span className="badge-dark" style={{ position: "absolute", top: 12, right: 12, fontSize: 11 }}>{car.city}</span>
       </div>
@@ -88,7 +88,7 @@ export default function Acceuil() {
             style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.8 }}
           />
         </div>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%)" }}/>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.1) 100%)" }} />
 
         <div className="container" style={{ position: "relative", paddingTop: 120, paddingBottom: 120 }}>
           <div style={{ maxWidth: 640 }} className="anim-up">
@@ -104,12 +104,39 @@ export default function Acceuil() {
 
             {/* Search bar */}
             <form onSubmit={e => { e.preventDefault(); navigate(`/Marketplace${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}
-              style={{ display: "flex", maxWidth: 540, background: "#fff" }}>
-              <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+              style={{
+                display: "flex",
+                maxWidth: 560,
+                background: "#fff",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+                overflow: "hidden",
+              }}>
+              <input
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
                 placeholder="Rechercher une marque, un modèle…"
-                style={{ flex: 1, height: 60, padding: "0 20px", border: "none", outline: "none", fontFamily: "Manrope, sans-serif", fontSize: 15, color: "var(--text-secondary)" }}/>
-              <button type="submit" className="btn-primary" style={{ flexShrink: 0, padding: "0 28px", borderRadius: 0 }}>
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                style={{
+                  flex: 1,
+                  height: 52,
+                  padding: "0 20px",
+                  border: "none",
+                  outline: "none",
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: 14,
+                  fontWeight: 400,
+                  color: "var(--text-secondary)",
+                  background: "transparent",
+                }}
+              />
+              <button
+                type="submit"
+                className="btn-primary"
+                style={{ flexShrink: 0, padding: "0 28px", height: 52, lineHeight: "52px" }}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
                 Rechercher
               </button>
             </form>
@@ -154,7 +181,7 @@ export default function Acceuil() {
             </Link>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
-            {FEATURED.map(car => <CarCard key={car.id} car={car}/>)}
+            {FEATURED.map(car => <CarCard key={car.id} car={car} />)}
           </div>
         </div>
       </section>
@@ -168,11 +195,11 @@ export default function Acceuil() {
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 1 }}>
             {TRUST.map((item, i) => (
-              <div key={item.title} className={`anim-up-${i+1}`}
+              <div key={item.title} className={`anim-up-${i + 1}`}
                 style={{ background: "var(--bg-white)", padding: "40px 32px", borderLeft: i === 0 ? "4px solid var(--accent-blue)" : "1px solid var(--bg-off)" }}>
                 <div style={{ width: 52, height: 52, background: "#EBF3FF", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
                   <svg width="26" height="26" fill="none" stroke="var(--accent-blue)" viewBox="0 0 24 24" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon}/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                   </svg>
                 </div>
                 <h4 style={{ margin: "0 0 12px" }}>{item.title}</h4>
@@ -202,9 +229,9 @@ export default function Acceuil() {
             <div style={{ background: "var(--bg-off)", padding: "72px 52px" }}>
               <p style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 24, color: "var(--text-muted)" }}>Facteurs analysés par notre IA</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                {["Marque & Modèle","Année","Kilométrage","Carburant","Boîte de vitesse","Ville","État général","Saison"].map(f => (
+                {["Marque & Modèle", "Année", "Kilométrage", "Carburant", "Boîte de vitesse", "Ville", "État général", "Saison"].map(f => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-                    <div style={{ width: 8, height: 8, background: "var(--accent-blue)", flexShrink: 0 }}/>
+                    <div style={{ width: 8, height: 8, background: "var(--accent-blue)", flexShrink: 0 }} />
                     <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>{f}</span>
                   </div>
                 ))}

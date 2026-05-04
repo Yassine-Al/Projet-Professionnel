@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 
 const NAV = [
   { label: "Accueil", path: "/" },
-  { label: "Acheter", path: "/Marketplace" },
-  { label: "Vendre", path: "/sell" },
-  { label: "Estimer", path: "/Predict" },
+  { label: "Acheter une voiture", path: "/Marketplace" },
+  { label: "Vendre une voiture", path: "/sell" },
+  { label: "Estimation de prix", path: "/Predict" },
 ];
 
 function Logo() {
