@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PredictController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes (no auth needed, no CSRF)
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/predict', [PredictController::class, 'predict']);
 
 // Protected routes (require Sanctum token)
 Route::middleware('auth:sanctum')->group(function () {
