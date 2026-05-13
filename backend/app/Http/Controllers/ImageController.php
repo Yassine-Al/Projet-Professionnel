@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Annonce;
 use App\Models\Image;
 use Illuminate\Http\Request;
 
@@ -28,7 +29,22 @@ class ImageController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'annonce_id' => 'required|exists:annonces,id',
+            'image' => 'required|image|max:2048',
+        ]);
+
+        $path = $request->file('image')->store('annonces', 'public');
+
+        $image = Image::create([
+            'annonce_id' => $request->annonce_id,
+            'url' => $path,
+        ]);
+
+        return response()->json([
+            'message' => 'Image uploaded',
+            'data' => $image
+        ]);
     }
 
     /**
@@ -60,6 +76,18 @@ class ImageController extends Controller
      */
     public function destroy(Image $image)
     {
-        //
+        $image = Image::findOrFail($image);
+
+        $annonce = Annonce::findOrFail($image->annonce_id);
+
+        if ($annonce->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $image->delete();
+
+        return response()->json([
+            'message' => 'Image deleted'
+        ]);
     }
 }

@@ -7,12 +7,42 @@ use Illuminate\Http\Request;
 
 class FavoriteController extends Controller
 {
+
+    public function toggle($annonceId)
+    {
+        $favorite = Favorite::where('user_id', auth()->id())
+            ->where('annonce_id', $annonceId)
+            ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+
+            return response()->json([
+                'message' => 'Removed from favorites'
+            ]);
+        }
+
+        $favorite = Favorite::create([
+            'user_id' => auth()->id(),
+            'annonce_id' => $annonceId
+        ]);
+
+        return response()->json([
+            'message' => 'Added to favorites',
+            'data' => $favorite
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $favorites = Favorite::with('annonce.images')
+            ->where('user_id', auth()->id())
+            ->get();
+
+        return response()->json($favorites);
     }
 
     /**
@@ -60,6 +90,20 @@ class FavoriteController extends Controller
      */
     public function destroy(Favorite $favorite)
     {
-        //
+        $favorite = Favorite::where('user_id', auth()->id())
+            ->where('annonce_id', $favorite->id)
+            ->first();
+
+        if (!$favorite) {
+            return response()->json([
+                'message' => 'Favorite not found'
+            ], 404);
+        }
+
+        $favorite->delete();
+
+        return response()->json([
+            'message' => 'Favorite removed'
+        ]);
     }
 }
