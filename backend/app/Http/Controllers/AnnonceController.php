@@ -10,21 +10,68 @@ class AnnonceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $annonces = Annonce::with(['images', 'user'])
-            ->latest()
-            ->paginate(10);
+        $query = Annonce::with(['images', 'user'])->latest();
 
-        return response()->json($annonces);
+        $query->where('status', $request->input('status', 'approved'));
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('brand', 'like', "%{$search}%")
+                  ->orWhere('model', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('brand')) {
+            $query->where('brand', 'like', "%{$request->brand}%");
+        }
+
+        if ($request->filled('fuel_type')) {
+            $query->where('fuel_type', $request->fuel_type);
+        }
+
+        if ($request->filled('transmission')) {
+            $query->where('transmission', $request->transmission);
+        }
+
+        if ($request->filled('car_condition')) {
+            $query->where('car_condition', $request->car_condition);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        if ($request->filled('min_year')) {
+            $query->where('model_year', '>=', $request->min_year);
+        }
+
+        if ($request->filled('max_year')) {
+            $query->where('model_year', '<=', $request->max_year);
+        }
+
+        return response()->json($query->paginate(10));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function myAnnonces(Request $request)
     {
-        //
+        $query = Annonce::with(['images'])
+            ->where('user_id', auth()->id())
+            ->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json($query->paginate(10));
     }
 
     /**
@@ -72,18 +119,9 @@ class AnnonceController extends Controller
      */
     public function show(Annonce $annonce)
     {
-        $annonce = Annonce::with(['images', 'user', 'reviews'])
-            ->findOrFail($annonce);
+        $annonce->load(['images', 'user', 'reviews']);
 
         return response()->json($annonce);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Annonce $annonce)
-    {
-        //
     }
 
     /**
@@ -91,13 +129,25 @@ class AnnonceController extends Controller
      */
     public function update(Request $request, Annonce $annonce)
     {
-        $annonce = Annonce::findOrFail($annonce);
-
         if ($annonce->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $annonce->update($request->all());
+        $validated = $request->validate([
+            'title'        => 'sometimes|string',
+            'description'  => 'sometimes|string',
+            'price'        => 'sometimes|numeric',
+            'brand'        => 'sometimes|string',
+            'model'        => 'sometimes|string',
+            'model_year'   => 'sometimes|integer',
+            'mileage'      => 'sometimes|integer',
+            'fuel_type'    => 'sometimes|string',
+            'transmission' => 'sometimes|string',
+            'fiscal_power' => 'sometimes|string',
+            'car_condition'=> 'sometimes|string',
+        ]);
+
+        $annonce->update($validated);
 
         return response()->json([
             'message' => 'Annonce updated',
@@ -110,8 +160,6 @@ class AnnonceController extends Controller
      */
     public function destroy(Annonce $annonce)
     {
-        $annonce = Annonce::findOrFail($annonce);
-
         if ($annonce->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -121,5 +169,20 @@ class AnnonceController extends Controller
         return response()->json([
             'message' => 'Annonce deleted'
         ]);
+    }
+
+    public function markSold(Annonce $annonce)
+    {
+        if ($annonce->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($annonce->status !== 'approved') {
+            return response()->json(['error' => 'Only approved annonces can be marked as sold'], 422);
+        }
+
+        $annonce->update(['status' => 'sold']);
+
+        return response()->json(['message' => 'Annonce marked as sold', 'data' => $annonce]);
     }
 }

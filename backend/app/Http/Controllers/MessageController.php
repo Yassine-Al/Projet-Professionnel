@@ -2,130 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
-use Illuminate\Http\Request;
+use App\Events\MessageSent;
+use App\Http\Requests\SendMessageRequest;
+use App\Http\Resources\MessageResource;
+use App\Models\Conversation;
 
 class MessageController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * POST /conversations/{conversation}/messages
+     * Envoie un message et met à jour les métadonnées de la conversation.
+     * Le broadcast Reverb sera ajouté à l'étape Events (étape 9).
      */
-    public function index($userId, $annonceId)
+    public function store(SendMessageRequest $request, Conversation $conversation)
     {
-        $messages = Message::where('annonce_id', $annonceId)
-            ->where(function ($query) use ($userId) {
-                $query->where(function ($q) use ($userId) {
-                    $q->where('sender_id', auth()->id())
-                    ->where('receiver_id', $userId);
-                })->orWhere(function ($q) use ($userId) {
-                    $q->where('sender_id', $userId)
-                    ->where('receiver_id', auth()->id());
-                });
-            })
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $this->authorize('participate', $conversation);
 
-        return response()->json($messages);
-    }
+        $senderId = auth()->id();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'receiver_id' => 'required|exists:users,id',
-            'annonce_id' => 'required|exists:annonces,id',
-            'content' => 'required|string'
+        $message = $conversation->messages()->create([
+            'sender_id' => $senderId,
+            'content'   => $request->content,
         ]);
 
-        $message = Message::create([
-            'sender_id' => auth()->id(),
-            'receiver_id' => $request->input('receiver_id'),
-            'annonce_id' => $request->input('annonce_id'),
-            'content' => $request->input('content'),
-        ]);
+        // Incrémenter le compteur non-lus du destinataire
+        $recipientField = $conversation->getUnreadFieldFor(
+            $senderId === $conversation->buyer_id
+                ? $conversation->seller_id
+                : $conversation->buyer_id
+        );
+        $conversation->increment($recipientField);
+        $conversation->update(['last_message_at' => now()]);
 
-        return response()->json([
-            'message' => 'Message sent successfully',
-            'data' => $message
-        ]);
+        $message->load('sender');
+
+        // Diffuse l'event sur private-conversation.{id} — l'expéditeur est exclu (.toOthers())
+        broadcast(new MessageSent($message))->toOthers();
+
+        return new MessageResource($message);
     }
 
     /**
-     * Display the specified resource.
+     * POST /conversations/{conversation}/messages/read
+     * Marque tous les messages non lus reçus dans cette conversation comme lus.
+     * Remet à zéro le compteur dénormalisé de l'appelant.
      */
-    public function show(Message $message)
+    public function markAllRead(Conversation $conversation)
     {
-        //
-    }
+        $this->authorize('markRead', $conversation);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Message $message)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Message $message)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Message $message)
-    {
-        $message = Message::findOrFail($message->id);
-
-        if ($message->sender_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $message->delete();
-
-        return response()->json([
-            'message' => 'Message deleted'
-        ]);
-    }
-
-    public function inbox()
-    {
         $userId = auth()->id();
 
-        $messages = Message::with(['sender', 'receiver', 'annonce'])
-            ->where('sender_id', $userId)
-            ->orWhere('receiver_id', $userId)
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->unique(function ($msg) use ($userId) {
-                return $msg->annonce_id . '-' . 
-                    ($msg->sender_id == $userId ? $msg->receiver_id : $msg->sender_id);
-            });
+        $updated = $conversation->messages()
+            ->where('sender_id', '!=', $userId)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
 
-        return response()->json($messages);
-    }
+        if ($updated > 0) {
+            $conversation->update([$conversation->getUnreadFieldFor($userId) => 0]);
+        }
 
-    public function sent()
-    {
-        $messages = Message::with(['receiver', 'annonce'])
-            ->where('sender_id', auth()->id())
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json($messages);
+        return response()->json(['message' => 'Messages marked as read', 'count' => $updated]);
     }
 }

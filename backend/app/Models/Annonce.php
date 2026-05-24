@@ -16,10 +16,12 @@ class Annonce extends Model
         'price',
         'brand',
         'model',
-        'year',
+        'model_year',
         'mileage',
-        'fuel',
+        'fuel_type',
         'transmission',
+        'fiscal_power',
+        'car_condition',
         'status',
     ];
 
@@ -43,8 +45,8 @@ class Annonce extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function messages()
+    public function conversations()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Conversation::class);
     }
 }

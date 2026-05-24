@@ -9,33 +9,31 @@ class PredictionController extends Controller
 {
     public function predict(Request $request)
     {
-        // 1. validation
         $request->validate([
-            'brand' => 'required|string',
-            'model' => 'required|string',
-            'model_year' => 'required|integer',
-            'mileage' => 'required|integer',
-            'fuel_type' => 'required|string',
-            'transmission' => 'required|string',
-            'car_condition' => 'required|string',
+            ‘brand’          => ‘required|string’,
+            ‘model’          => ‘required|string’,
+            ‘model_year’     => ‘required|integer|min:1900|max:’ . date(‘Y’),
+            ‘mileage’        => ‘required|integer|min:0’,
+            ‘fuel_type’      => ‘required|string’,
+            ‘transmission’   => ‘required|string’,
+            ‘car_condition’  => ‘required|string’,
+            ‘fiscal_power’   => ‘nullable|integer|min:1’,
+            ‘origine’        => ‘nullable|string’,
         ]);
 
-        // 2. calcul age (IMPORTANT pour ton modèle)
-        $currentYear = date("Y");
-        $age = $currentYear - $request->model_year;
+        $age = date(‘Y’) - $request->model_year;
 
-        // 3. mapping vers FastAPI format
-        $response = Http::post('http://127.0.0.1:8001/predict', [
-            'etat' => $request->car_condition,
-            'boite_de_vitesses' => $request->transmission,
-            'type_de_carburant' => $request->fuel_type,
-            'marque' => $request->brand,
-            'modele' => $request->model,
-            'origine' => 'maroc', // valeur par défaut (tu peux changer)
-            'kilometrage' => $request->mileage,
-            'age' => $age,
-            'puissance_fiscale' => 6, // ⚠️ à récupérer si tu l’ajoutes côté frontend
-            'annee_modele' => $request->model_year,
+        $response = Http::post(env(‘PREDICTION_SERVICE_URL’, ‘http://127.0.0.1:8001’) . ‘/predict’, [
+            ‘etat’              => $request->car_condition,
+            ‘boite_de_vitesses’ => $request->transmission,
+            ‘type_de_carburant’ => $request->fuel_type,
+            ‘marque’            => $request->brand,
+            ‘modele’            => $request->model,
+            ‘origine’           => $request->input(‘origine’, ‘maroc’),
+            ‘kilometrage’       => $request->mileage,
+            ‘age’               => $age,
+            ‘puissance_fiscale’ => $request->input(‘fiscal_power’, 6),
+            ‘annee_modele’      => $request->model_year,
         ]);
 
         // 4. check erreur API

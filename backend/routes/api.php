@@ -8,8 +8,10 @@ use App\Http\Controllers\AnnonceController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PredictionController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,12 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | AUTH USER
+    | AUTH USER & PROFILE
     |--------------------------------------------------------------------------
     */
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('/user', [UserController::class, 'show']);
+    Route::put('/user', [UserController::class, 'update']);
+    Route::delete('/user', [UserController::class, 'destroy']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -46,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::apiResource('annonces', AnnonceController::class);
+    Route::get('my-annonces', [AnnonceController::class, 'myAnnonces']);
+    Route::post('annonces/{annonce}/mark-sold', [AnnonceController::class, 'markSold']);
 
     /*
     |--------------------------------------------------------------------------
@@ -74,16 +78,23 @@ Route::middleware('auth:sanctum')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | MESSAGES (CHAT SYSTEM)
+    | CONVERSATIONS & MESSAGES (CHAT SYSTEM)
     |--------------------------------------------------------------------------
     */
-    Route::post('messages', [MessageController::class, 'store']);
 
-    Route::get('messages/{userId}/{annonceId}', [MessageController::class, 'index']);
+    // Inbox + initiation conversation (idempotent firstOrCreate)
+    Route::get('conversations', [ConversationController::class, 'index']);
+    Route::post('conversations', [ConversationController::class, 'store']);
 
-    Route::delete('messages/{id}', [MessageController::class, 'destroy']);
+    // Historique + auto-mark-read à l'ouverture
+    Route::get('conversations/{conversation}', [ConversationController::class, 'show']);
 
-    Route::get('inbox', [MessageController::class, 'inbox']);
+    // Badge non-lus global (navbar)
+    Route::get('unread-count', [ConversationController::class, 'unreadCount']);
+
+    // Messages dans une conversation
+    Route::post('conversations/{conversation}/messages', [MessageController::class, 'store']);
+    Route::post('conversations/{conversation}/messages/read', [MessageController::class, 'markAllRead']);
 
     /*
     |--------------------------------------------------------------------------

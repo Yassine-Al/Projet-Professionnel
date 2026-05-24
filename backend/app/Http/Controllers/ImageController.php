@@ -31,8 +31,14 @@ class ImageController extends Controller
     {
         $request->validate([
             'annonce_id' => 'required|exists:annonces,id',
-            'image' => 'required|image|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,webp|max:2048',
         ]);
+
+        $annonce = Annonce::findOrFail($request->annonce_id);
+
+        if ($annonce->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
 
         $path = $request->file('image')->store('annonces', 'public');
 
@@ -76,8 +82,6 @@ class ImageController extends Controller
      */
     public function destroy(Image $image)
     {
-        $image = Image::findOrFail($image);
-
         $annonce = Annonce::findOrFail($image->annonce_id);
 
         if ($annonce->user_id !== auth()->id()) {
