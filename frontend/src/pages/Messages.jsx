@@ -77,6 +77,32 @@ export default function Messages() {
     }
   }, [messages]);
 
+  // Poll active conversation for new messages every 4s
+  useEffect(() => {
+    if (!activeConv) return;
+    const id = activeConv.id;
+    const interval = setInterval(() => {
+      axiosClient.get(`/conversations/${id}`)
+        .then(r => {
+          const fresh = r.data.messages?.data ?? r.data.messages ?? [];
+          setMessages(current => {
+            const hasNew = fresh.some(m => !current.find(c => c.id === m.id));
+            if (!hasNew) return current;
+            const temps = current.filter(m => String(m.id).startsWith("temp-"));
+            return [...fresh, ...temps];
+          });
+        })
+        .catch(() => {});
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activeConv?.id]);
+
+  // Poll inbox for unread badge updates every 10s
+  useEffect(() => {
+    const interval = setInterval(loadConversations, 10000);
+    return () => clearInterval(interval);
+  }, [loadConversations]);
+
   const sendMessage = async (e) => {
     e?.preventDefault();
     const content = text.trim();
