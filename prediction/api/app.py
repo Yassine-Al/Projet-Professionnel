@@ -3,9 +3,23 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
+from datetime import datetime
+from sklearn.base import BaseEstimator, TransformerMixin
+
+
+class DataTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, columns_to_drop):
+        self.columns_to_drop = columns_to_drop
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        X.drop(self.columns_to_drop, axis=1, errors='ignore', inplace=True)
+        return X
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=['http://localhost:3000', 'http://localhost:8000'])
 
 # ── Load the trained pipeline once at startup ──────────────────────────────────
 BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
@@ -14,10 +28,10 @@ PIPELINE_PATH = os.path.join(BASE_DIR, '..', 'production', 'final_pipeline.pkl')
 pipeline = None
 if os.path.isfile(PIPELINE_PATH):
     pipeline = joblib.load(PIPELINE_PATH)
-    print(f"✅  Pipeline loaded from {PIPELINE_PATH}")
+    print(f"[OK] Pipeline loaded from {PIPELINE_PATH}")
 else:
     print(
-        f"⚠️  Pipeline not found at {PIPELINE_PATH}\n"
+        f"[WARN] Pipeline not found at {PIPELINE_PATH}\n"
         "   Run  python prediction/api/generate_pipeline.py  (after placing data.csv)\n"
         "   to train and export the model. The /predict endpoint will return 503 until then."
     )
@@ -45,13 +59,18 @@ def predict():
 
     data = request.get_json(force=True)
 
-    # Frontend sends `annee` (e.g. 2019); backend converts → age = 2026 - annee
+    required_fields = ['marque', 'modele', 'annee', 'kilometrage', 'etat',
+                       'boite-de-vitesses', 'type-de-carburant']
+    missing = [f for f in required_fields if not data.get(f)]
+    if missing:
+        return jsonify({'error': f'Champs obligatoires manquants : {", ".join(missing)}'}), 400
+
     try:
-        annee = int(data.get('annee', 2020))
+        annee = int(data.get('annee'))
     except (ValueError, TypeError):
         return jsonify({'error': 'Valeur invalide pour annee'}), 400
 
-    age = 2026 - annee
+    age = datetime.now().year - annee
 
     # Build the DataFrame with the exact column names the pipeline expects
     try:
@@ -78,6 +97,9 @@ def predict():
     except Exception as e:
         return jsonify({'error': f'Erreur de prédiction : {e}'}), 500
 
+    if raw_price <= 0:
+        return jsonify({'error': 'Prédiction invalide : prix négatif ou nul'}), 500
+
     # Round to nearest 500 MAD for cleaner display
     mid  = round(raw_price / 500) * 500
     low  = round(raw_price * 0.90 / 500) * 500
@@ -92,4 +114,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=8001, debug=True)
