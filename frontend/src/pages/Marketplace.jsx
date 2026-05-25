@@ -22,7 +22,7 @@ function CarCard({ car }) {
       onMouseOut={e => e.currentTarget.style.boxShadow = "none"}>
       <div style={{ position: "relative", height: 185, overflow: "hidden", background: "var(--bg-off)" }}>
         {img ? (
-          <img src={img} alt={car.title}
+          <img src={img} alt={car.title} referrerPolicy="no-referrer"
             style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s" }}
             onMouseOver={e => e.target.style.transform = "scale(1.05)"}
             onMouseOut={e => e.target.style.transform = "scale(1)"} />

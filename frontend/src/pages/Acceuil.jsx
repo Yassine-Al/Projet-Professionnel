@@ -3,12 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import cutteryt from "../assets/cutteryt.mp4";
 import { axiosClient } from "../api/axios";
 
-const FEATURED = [
-  { id: 1, year: 2021, make: "Dacia", model: "Duster Prestige", price: 148000, mileage: 42000, fuel: "Diesel", city: "Casablanca", tag: "En vedette", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop&q=80" },
-  { id: 2, year: 2020, make: "Volkswagen", model: "Golf 8 R-Line", price: 210000, mileage: 28000, fuel: "Essence", city: "Rabat", tag: "Nouveau", img: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&auto=format&fit=crop&q=80" },
-  { id: 3, year: 2022, make: "BMW", model: "Série 3 320d", price: 385000, mileage: 15000, fuel: "Diesel", city: "Marrakech", tag: "Premium", img: "https://images.unsplash.com/photo-1580273916550-22f79a72d97d?w=600&auto=format&fit=crop&q=80" },
-  { id: 4, year: 2019, make: "Renault", model: "Clio 5 Intens", price: 98000, mileage: 67000, fuel: "Essence", city: "Fès", tag: "Bonne affaire", img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&auto=format&fit=crop&q=80" },
-];
 
 const BRANDS     = ["Dacia", "Volkswagen", "BMW", "Renault", "Peugeot", "Toyota", "Mercedes", "Hyundai", "Ford", "Kia"];
 const ALL_BRANDS = ["Audi", "BMW", "Citroën", "Dacia", "Fiat", "Ford", "Honda", "Hyundai", "Kia", "Land Rover",
@@ -28,24 +22,35 @@ const STATS = [
 ];
 
 function CarCard({ car }) {
+  const img   = car.images?.[0]?.url;
+  const price = Number(car.price).toLocaleString("fr-MA");
+  const km    = Number(car.mileage).toLocaleString("fr-MA");
   return (
     <Link to={`/cars/${car.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}
-      onMouseOver={e => { e.currentTarget.querySelector(".card-img").style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "var(--shadow-2)"; }}
-      onMouseOut={e => { e.currentTarget.querySelector(".card-img").style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}
+      onMouseOver={e => { e.currentTarget.querySelector(".card-img")?.style && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1.05)"); e.currentTarget.style.boxShadow = "var(--shadow-2)"; }}
+      onMouseOut={e => { e.currentTarget.querySelector(".card-img")?.style && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1)"); e.currentTarget.style.boxShadow = "none"; }}
       style={{ border: "1px solid var(--border)", background: "var(--bg-white)", transition: "box-shadow 0.2s ease" }}>
-      <div style={{ position: "relative", height: 200, overflow: "hidden" }}>
-        <img className="card-img" src={car.img} alt={`${car.make} ${car.model}`}
-          style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }} />
+      <div style={{ position: "relative", height: 200, overflow: "hidden", background: "var(--bg-off)" }}>
+        {img ? (
+          <img className="card-img" src={img} alt={`${car.brand} ${car.model}`} referrerPolicy="no-referrer"
+            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="48" height="48" fill="none" stroke="var(--border)" strokeWidth={1.2} viewBox="0 0 24 24">
+              <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/>
+              <circle cx="7.5" cy="14.5" r="1.5"/><circle cx="16.5" cy="14.5" r="1.5"/>
+            </svg>
+          </div>
+        )}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }} />
-        <span className="badge-primary" style={{ position: "absolute", top: 12, left: 12 }}>{car.tag}</span>
-        <span className="badge-dark" style={{ position: "absolute", top: 12, right: 12, fontSize: 11 }}>{car.city}</span>
+        {car.city && <span className="badge-dark" style={{ position: "absolute", top: 12, right: 12, fontSize: 11 }}>{car.city}</span>}
       </div>
       <div style={{ padding: 20 }}>
-        <p style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 4 }}>{car.year} · {car.fuel} · {car.mileage.toLocaleString()} km</p>
-        <h4 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 12px", color: "var(--text-primary)" }}>{car.make} {car.model}</h4>
+        <p style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 4 }}>{car.model_year} · {car.fuel_type} · {km} km</p>
+        <h4 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 12px", color: "var(--text-primary)" }}>{car.brand} {car.model}</h4>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <span style={{ fontSize: 22, fontWeight: 800, color: "var(--accent-blue)" }}>{car.price.toLocaleString()}</span>
+            <span style={{ fontSize: 22, fontWeight: 800, color: "var(--accent-blue)" }}>{price}</span>
             <span style={{ fontSize: 13, color: "var(--text-muted)", marginLeft: 4 }}>MAD</span>
           </div>
           <span style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 600 }}>Voir →</span>
@@ -55,10 +60,25 @@ function CarCard({ car }) {
   );
 }
 
+function CardSkeleton() {
+  return (
+    <div style={{ border: "1px solid var(--border)", background: "var(--bg-white)" }}>
+      <div style={{ height: 200, background: "var(--bg-off)" }} />
+      <div style={{ padding: 20 }}>
+        <div style={{ height: 12, width: "60%", background: "var(--bg-off)", marginBottom: 10 }} />
+        <div style={{ height: 16, width: "80%", background: "var(--bg-off)", marginBottom: 14 }} />
+        <div style={{ height: 20, width: "40%", background: "var(--bg-off)" }} />
+      </div>
+    </div>
+  );
+}
+
 export default function Acceuil() {
   const [query,       setQuery]       = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSugg,    setShowSugg]    = useState(false);
+  const [featured,    setFeatured]    = useState([]);
+  const [featLoading, setFeatLoading] = useState(true);
   const navigate     = useNavigate();
   const debounceRef  = useRef(null);
   const inputWrapRef = useRef(null);
@@ -71,6 +91,13 @@ export default function Acceuil() {
     };
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  useEffect(() => {
+    axiosClient.get("/annonces", { params: { status: "approved", per_page: 4, sort: "created_at", dir: "desc" } })
+      .then(res => setFeatured(res.data.data ?? []))
+      .catch(() => setFeatured([]))
+      .finally(() => setFeatLoading(false));
   }, []);
 
   useEffect(() => {
@@ -286,7 +313,15 @@ export default function Acceuil() {
             </Link>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
-            {FEATURED.map(car => <CarCard key={car.id} car={car} />)}
+            {featLoading
+              ? Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)
+              : featured.map(car => <CarCard key={car.id} car={car} />)
+            }
+          </div>
+          <div style={{ textAlign: "center", marginTop: 48 }}>
+            <Link to="/Marketplace" className="btn-primary" style={{ fontSize: 16, padding: "0 48px", height: 52, lineHeight: "52px", display: "inline-block" }}>
+              Voir toutes les annonces
+            </Link>
           </div>
         </div>
       </section>
