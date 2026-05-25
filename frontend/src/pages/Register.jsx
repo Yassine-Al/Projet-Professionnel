@@ -113,7 +113,26 @@ export default function Register() {
               <Field label="Prénom" value={form.name} onChange={set("name")} error={errors.name} placeholder="Mohamed" />
               <Field label="Nom" value={form.last_name} onChange={set("last_name")} error={errors.last_name} placeholder="Alami" />
             </div>
-            <Field label="Adresse email" type="email" value={form.email} onChange={set("email")} error={errors.email} placeholder="votre@email.ma" />
+            <div>
+              <label className="form-label">Adresse email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={set("email")}
+                placeholder="votre@email.ma"
+                required
+                className="input-field"
+                style={{ fontSize: 15, borderColor: errors.email ? "var(--error)" : undefined }}
+              />
+              {errors.email && (
+                <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--error)" }}>
+                  {errors.email}
+                  {errors.email.includes("déjà associée") && (
+                    <> — <Link to="/Login" style={{ color: "var(--error)", fontWeight: 700, textDecoration: "underline" }}>Se connecter</Link></>
+                  )}
+                </p>
+              )}
+            </div>
             <Field label="Téléphone" type="tel" value={form.phone} onChange={set("phone")} placeholder="+212 6XX XXX XXX" optional />
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>

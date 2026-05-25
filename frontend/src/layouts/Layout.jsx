@@ -5,7 +5,7 @@ import { axiosClient } from "../api/axios";
 const NAV = [
   { label: "Accueil",              path: "/" },
   { label: "Acheter une voiture",  path: "/Marketplace" },
-  { label: "Vendre une voiture",   path: "/sell", auth: true },
+  { label: "Vendre une voiture",   path: "/sell" },
   { label: "Estimation de prix",   path: "/Predict" },
 ];
 

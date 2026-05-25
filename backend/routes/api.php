@@ -34,6 +34,10 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
     ->middleware(['signed', 'throttle:6,1'])
     ->name('api.verification.verify');
 
+// Public annonce browsing (no auth required)
+Route::get('annonces', [AnnonceController::class, 'index']);
+Route::get('annonces/{annonce}', [AnnonceController::class, 'show']);
+
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (Sanctum)
@@ -62,7 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     | ANNONCES (CORE)
     |--------------------------------------------------------------------------
     */
-    Route::apiResource('annonces', AnnonceController::class);
+    Route::apiResource('annonces', AnnonceController::class)->except(['index', 'show']);
     Route::get('my-annonces', [AnnonceController::class, 'myAnnonces']);
     Route::post('annonces/{annonce}/mark-sold', [AnnonceController::class, 'markSold']);
 

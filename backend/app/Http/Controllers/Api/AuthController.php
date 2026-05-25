@@ -21,6 +21,8 @@ class AuthController extends Controller
             'email'     => 'required|email|unique:users',
             'phone'     => 'nullable|string|max:20',
             'password'  => 'required|min:8|confirmed',
+        ], [
+            'email.unique' => 'Cette adresse email est déjà associée à un compte.',
         ]);
 
         $user = User::create([

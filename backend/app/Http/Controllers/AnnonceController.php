@@ -12,7 +12,11 @@ class AnnonceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Annonce::with(['images', 'user'])->latest();
+        $allowed = ['price', 'model_year', 'created_at'];
+        $sortCol = in_array($request->input('sort'), $allowed) ? $request->input('sort') : 'created_at';
+        $sortDir = $request->input('dir') === 'asc' ? 'asc' : 'desc';
+
+        $query = Annonce::with(['images', 'user'])->orderBy($sortCol, $sortDir);
 
         $query->where('status', $request->input('status', 'approved'));
 
@@ -58,7 +62,8 @@ class AnnonceController extends Controller
             $query->where('model_year', '<=', $request->max_year);
         }
 
-        return response()->json($query->paginate(10));
+        $perPage = min((int) $request->input('per_page', 12), 50);
+        return response()->json($query->paginate($perPage));
     }
 
     public function myAnnonces(Request $request)

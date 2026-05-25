@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import cutteryt from "../assets/cutteryt.mp4";
+import { axiosClient } from "../api/axios";
 
 const FEATURED = [
   { id: 1, year: 2021, make: "Dacia", model: "Duster Prestige", price: 148000, mileage: 42000, fuel: "Diesel", city: "Casablanca", tag: "En vedette", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&auto=format&fit=crop&q=80" },
@@ -9,7 +10,9 @@ const FEATURED = [
   { id: 4, year: 2019, make: "Renault", model: "Clio 5 Intens", price: 98000, mileage: 67000, fuel: "Essence", city: "Fès", tag: "Bonne affaire", img: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&auto=format&fit=crop&q=80" },
 ];
 
-const BRANDS = ["Dacia", "Volkswagen", "BMW", "Renault", "Peugeot", "Toyota", "Mercedes", "Hyundai", "Ford", "Kia"];
+const BRANDS     = ["Dacia", "Volkswagen", "BMW", "Renault", "Peugeot", "Toyota", "Mercedes", "Hyundai", "Ford", "Kia"];
+const ALL_BRANDS = ["Audi", "BMW", "Citroën", "Dacia", "Fiat", "Ford", "Honda", "Hyundai", "Kia", "Land Rover",
+  "Mercedes", "Nissan", "Opel", "Peugeot", "Renault", "Seat", "Skoda", "Toyota", "Volkswagen", "Volvo"];
 
 const TRUST = [
   { title: "Annonces vérifiées", desc: "Chaque annonce est contrôlée par notre équipe pour garantir l'authenticité des informations et protéger les acheteurs.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
@@ -53,8 +56,22 @@ function CarCard({ car }) {
 }
 
 export default function Acceuil() {
-  const [query, setQuery] = useState("");
-  const navigate = useNavigate();
+  const [query,       setQuery]       = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSugg,    setShowSugg]    = useState(false);
+  const navigate     = useNavigate();
+  const debounceRef  = useRef(null);
+  const inputWrapRef = useRef(null);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (inputWrapRef.current && !inputWrapRef.current.contains(e.target)) {
+        setShowSugg(false);
+      }
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -73,6 +90,49 @@ export default function Acceuil() {
 
     return () => observer.disconnect();
   }, []);
+
+  const handleSearchInput = (value) => {
+    setQuery(value);
+    clearTimeout(debounceRef.current);
+    if (value.length < 2) { setSuggestions([]); setShowSugg(false); return; }
+
+    const lower = value.toLowerCase();
+    const brandMatches = ALL_BRANDS
+      .filter(b => b.toLowerCase().includes(lower))
+      .slice(0, 4);
+
+    debounceRef.current = setTimeout(() => {
+      axiosClient.get("/annonces", { params: { search: value, per_page: 8, status: "approved" } })
+        .then(res => {
+          const seen = new Set(brandMatches.map(b => b.toLowerCase()));
+          const modelSuggs = [];
+          res.data.data.forEach(car => {
+            const key = `${car.brand} ${car.model}`;
+            if (!seen.has(key.toLowerCase())) {
+              seen.add(key.toLowerCase());
+              modelSuggs.push({ label: key, type: "model" });
+            }
+          });
+          const all = [
+            ...brandMatches.map(b => ({ label: b, type: "brand" })),
+            ...modelSuggs.slice(0, 5),
+          ];
+          setSuggestions(all);
+          setShowSugg(all.length > 0);
+        })
+        .catch(() => {
+          const all = brandMatches.map(b => ({ label: b, type: "brand" }));
+          setSuggestions(all);
+          setShowSugg(all.length > 0);
+        });
+    }, 220);
+  };
+
+  const selectSuggestion = (val) => {
+    clearTimeout(debounceRef.current);
+    setShowSugg(false);
+    navigate(`/Marketplace?q=${encodeURIComponent(val)}`);
+  };
 
   return (
     <div>
@@ -103,43 +163,88 @@ export default function Acceuil() {
             </p>
 
             {/* Search bar */}
-            <form onSubmit={e => { e.preventDefault(); navigate(`/Marketplace${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}
-              style={{
-                display: "flex",
-                maxWidth: 560,
-                background: "#fff",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
-                overflow: "hidden",
-              }}>
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Rechercher une marque, un modèle…"
+            <div ref={inputWrapRef} style={{ position: "relative", maxWidth: 560 }}>
+              <form onSubmit={e => { e.preventDefault(); setShowSugg(false); navigate(`/Marketplace${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}
                 style={{
-                  flex: 1,
-                  height: 52,
-                  padding: "0 20px",
-                  border: "none",
-                  outline: "none",
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: 14,
-                  fontWeight: 400,
-                  color: "var(--text-secondary)",
-                  background: "transparent",
-                }}
-              />
-              <button
-                type="submit"
-                className="btn-primary"
-                style={{ flexShrink: 0, padding: "0 28px", height: 52, lineHeight: "52px" }}
-              >
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Rechercher
-              </button>
-            </form>
+                  display: "flex",
+                  background: "#fff",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
+                  overflow: "hidden",
+                }}>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={e => handleSearchInput(e.target.value)}
+                  onFocus={() => suggestions.length > 0 && setShowSugg(true)}
+                  placeholder="Rechercher une marque, un modèle…"
+                  autoComplete="off"
+                  style={{
+                    flex: 1,
+                    height: 52,
+                    padding: "0 20px",
+                    border: "none",
+                    outline: "none",
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: 14,
+                    fontWeight: 400,
+                    color: "var(--text-secondary)",
+                    background: "transparent",
+                  }}
+                />
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  style={{ flexShrink: 0, padding: "0 28px", height: 52, lineHeight: "52px" }}
+                >
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Rechercher
+                </button>
+              </form>
+
+              {showSugg && suggestions.length > 0 && (
+                <div style={{
+                  position: "absolute", top: "100%", left: 0, right: 0,
+                  background: "#fff",
+                  borderTop: "1px solid #eee",
+                  zIndex: 100,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                }}>
+                  {suggestions.map((s, i) => (
+                    <div
+                      key={i}
+                      onMouseDown={() => selectSuggestion(s.label)}
+                      style={{
+                        padding: "10px 16px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        borderBottom: i < suggestions.length - 1 ? "1px solid #f0f0f0" : "none",
+                        fontSize: 14,
+                        color: "var(--text-primary)",
+                      }}
+                      onMouseOver={e => e.currentTarget.style.background = "#f7f9fc"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
+                    >
+                      <svg width="14" height="14" fill="none" stroke="#aaa" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                        {s.type === "brand"
+                          ? <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                          : <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+                        }
+                      </svg>
+                      <span style={{ flex: 1 }}>{s.label}</span>
+                      {s.type === "brand" && (
+                        <span style={{ fontSize: 11, color: "#aaa", background: "#f0f0f0", padding: "2px 6px" }}>
+                          Marque
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Stats row */}
             <div style={{ display: "flex", gap: 40, marginTop: 48, flexWrap: "wrap" }} className="anim-up-1">

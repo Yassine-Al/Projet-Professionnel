@@ -35,7 +35,7 @@ export const router = createBrowserRouter([
             { path: "/reset-password",   element: <ResetPassword /> },
             { path: "/Marketplace",    element: <Marketplace /> },
             { path: "/Predict",        element: <Predict /> },
-            { path: "/sell",           element: <RequireAuth redirect="/sell"><SellYourCar /></RequireAuth> },
+            { path: "/sell",           element: <SellYourCar /> },
             { path: "/cars/:id",       element: <CarDetails /> },
             { path: "/messages",       element: <Messages /> },
             { path: "/User/Dashboard", element: <p style={{ padding: 40, fontFamily: "Manrope,sans-serif" }}>Tableau de bord utilisateur — à venir.</p> },

@@ -23,6 +23,17 @@ class Annonce extends Model
         'fiscal_power',
         'car_condition',
         'status',
+        'city',
+        'doors',
+        'origin',
+        'first_hand',
+        'options',
+    ];
+
+    protected $casts = [
+        'options'     => 'array',
+        'first_hand'  => 'boolean',
+        'price'       => 'decimal:2',
     ];
 
     public function user()
