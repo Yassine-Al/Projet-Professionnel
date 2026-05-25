@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api/chat/stream`;
 const WELCOME = { role: "model", text: "Bonjour ! Je suis l'assistant ocazz.ma.\nComment puis-je vous aider ?" };
@@ -14,6 +15,8 @@ function TypingDots() {
 }
 
 export default function ChatWidget() {
+  const { pathname } = useLocation();
+  const btnBottom = pathname === "/messages" ? 108 : 28;
   const [open, setOpen]           = useState(false);
   const [msgs, setMsgs]           = useState([WELCOME]);
   const [input, setInput]         = useState("");
@@ -130,14 +133,14 @@ export default function ChatWidget() {
         onClick={() => setOpen(o => !o)}
         title="Assistant ocazz.ma"
         style={{
-          position: "fixed", bottom: 28, right: 28, zIndex: 1000,
+          position: "fixed", bottom: btnBottom, right: 28, zIndex: 1000,
+          transition: "background 0.18s, transform 0.18s, box-shadow 0.18s, bottom 0.2s",
           width: 56, height: 56,
           background: open ? "var(--secondary)" : "var(--accent-blue)",
           border: "none", cursor: "pointer",
           borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
           boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
-          transition: "background 0.18s, transform 0.18s, box-shadow 0.18s",
         }}
       >
         {open ? (
@@ -156,7 +159,7 @@ export default function ChatWidget() {
         <div
           className="chat-window"
           style={{
-            position: "fixed", bottom: 96, right: 28, zIndex: 999,
+            position: "fixed", bottom: btnBottom + 68, right: 28, zIndex: 999,
             width: 360, height: 520,
             background: "var(--bg-white)",
             border: "1px solid var(--border)",

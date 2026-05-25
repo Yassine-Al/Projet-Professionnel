@@ -86,6 +86,18 @@ class ConversationController extends Controller
     }
 
     /**
+     * DELETE /conversations/{conversation}
+     * Supprime la conversation et tous ses messages.
+     * Réservé aux deux participants.
+     */
+    public function destroy(Conversation $conversation)
+    {
+        $this->authorize('view', $conversation);
+        $conversation->delete();
+        return response()->json(['message' => 'Conversation supprimée']);
+    }
+
+    /**
      * GET /unread-count
      * Compteur global de messages non lus (badge navbar).
      * Lecture directe des compteurs dénormalisés : O(1).

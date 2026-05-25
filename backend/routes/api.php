@@ -112,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Historique + auto-mark-read à l'ouverture
     Route::get('conversations/{conversation}', [ConversationController::class, 'show']);
+    Route::delete('conversations/{conversation}', [ConversationController::class, 'destroy']);
 
     // Badge non-lus global (navbar)
     Route::get('unread-count', [ConversationController::class, 'unreadCount']);
