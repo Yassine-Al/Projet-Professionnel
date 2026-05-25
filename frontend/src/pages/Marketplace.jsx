@@ -16,15 +16,14 @@ function CarCard({ car }) {
   const price = Number(car.price).toLocaleString("fr-MA");
 
   return (
-    <Link to={`/cars/${car.id}`} style={{ textDecoration: "none", color: "inherit", display: "block",
-      border: "1px solid var(--border)", background: "var(--bg-white)", transition: "box-shadow 0.2s" }}
-      onMouseOver={e => e.currentTarget.style.boxShadow = "var(--shadow-2)"}
-      onMouseOut={e => e.currentTarget.style.boxShadow = "none"}>
+    <Link to={`/cars/${car.id}`} style={{ textDecoration: "none", color: "inherit", display: "block", borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-white)", boxShadow: "var(--shadow-xs)", transition: "box-shadow 0.25s, transform 0.25s" }}
+      onMouseOver={e => { e.currentTarget.style.boxShadow = "var(--shadow-lg)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
+      onMouseOut={e => { e.currentTarget.style.boxShadow = "var(--shadow-xs)"; e.currentTarget.style.transform = "none"; }}>
       <div style={{ position: "relative", height: 185, overflow: "hidden", background: "var(--bg-off)" }}>
         {img ? (
           <img src={img} alt={car.title} referrerPolicy="no-referrer"
-            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s" }}
-            onMouseOver={e => e.target.style.transform = "scale(1.05)"}
+            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.45s cubic-bezier(0.4,0,0.2,1)" }}
+            onMouseOver={e => e.target.style.transform = "scale(1.06)"}
             onMouseOut={e => e.target.style.transform = "scale(1)"} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -34,22 +33,23 @@ function CarCard({ car }) {
             </svg>
           </div>
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top,rgba(0,0,0,0.4) 0%,transparent 55%)" }}/>
-        {car.city && <span className="badge-dark" style={{ position: "absolute", top: 10, right: 10, fontSize: 11 }}>{car.city}</span>}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top,rgba(0,0,0,0.45) 0%,transparent 55%)" }}/>
+        {car.city && <span className="badge-dark" style={{ position: "absolute", top: 10, right: 10 }}>{car.city}</span>}
       </div>
-      <div style={{ padding: 18 }}>
-        <p style={{ color: "var(--text-faint)", fontSize: 12, margin: "0 0 4px" }}>
+      <div style={{ padding: "16px 18px 18px" }}>
+        <p style={{ color: "var(--text-faint)", fontSize: 12, margin: "0 0 5px", fontWeight: 500 }}>
           {car.model_year} · {car.fuel_type} · {km} km
         </p>
-        <p style={{ fontWeight: 700, fontSize: 16, margin: "0 0 12px", color: "var(--text-primary)",
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        <p style={{ fontFamily: "Manrope,sans-serif", fontWeight: 700, fontSize: 15, margin: "0 0 12px", color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {car.brand} {car.model}
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 800, fontSize: 20, color: "var(--accent-blue)" }}>
-            {price} <span style={{ fontSize: 12, fontWeight: 400, color: "var(--text-muted)" }}>MAD</span>
+          <span style={{ fontFamily: "Manrope,sans-serif", fontWeight: 800, fontSize: 19, color: "var(--accent-blue)" }}>
+            {price} <span style={{ fontSize: 11, fontWeight: 400, color: "var(--text-faint)" }}>MAD</span>
           </span>
-          <span style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 600 }}>Voir →</span>
+          <span style={{ color: "var(--accent-blue)", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 2 }}>
+            Voir <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </span>
         </div>
       </div>
     </Link>
@@ -58,12 +58,12 @@ function CarCard({ car }) {
 
 function Skeleton() {
   return (
-    <div style={{ border: "1px solid var(--border)", background: "var(--bg-white)" }}>
-      <div style={{ height: 185, background: "var(--bg-off)" }} />
-      <div style={{ padding: 18 }}>
-        <div style={{ height: 12, width: "60%", background: "var(--bg-off)", marginBottom: 8 }} />
-        <div style={{ height: 16, width: "80%", background: "var(--bg-off)", marginBottom: 12 }} />
-        <div style={{ height: 20, width: "40%", background: "var(--bg-off)" }} />
+    <div style={{ borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-white)" }}>
+      <div className="skeleton" style={{ height: 185, borderRadius: 0 }} />
+      <div style={{ padding: "16px 18px 18px" }}>
+        <div className="skeleton" style={{ height: 11, width: "55%", marginBottom: 8 }} />
+        <div className="skeleton" style={{ height: 15, width: "75%", marginBottom: 14 }} />
+        <div className="skeleton" style={{ height: 18, width: "38%" }} />
       </div>
     </div>
   );
@@ -264,7 +264,7 @@ export default function Marketplace() {
 
       <div className="container" style={{ paddingTop: 40, paddingBottom: 60, display: "grid", gridTemplateColumns: "220px 1fr", gap: 32, alignItems: "start" }}>
         {/* Sidebar */}
-        <aside style={{ border: "1px solid var(--border)", padding: "24px 20px", position: "sticky", top: 100 }}>
+        <aside style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "24px 20px", position: "sticky", top: 100, boxShadow: "var(--shadow-xs)" }}>
           <h4 style={{ margin: "0 0 20px", fontSize: 16 }}>Filtres</h4>
           <Sel label="Marque" opts={BRANDS} val={brand} set={setBrand} />
           <Sel label="Carburant" opts={FUELS} val={fuel} set={setFuel} />
@@ -298,7 +298,9 @@ export default function Marketplace() {
           </div>
 
           <button onClick={reset}
-            style={{ background: "none", border: "1px solid var(--border)", color: "var(--text-muted)", fontFamily: "Manrope,sans-serif", fontSize: 13, padding: "8px 16px", cursor: "pointer", width: "100%" }}>
+            style={{ background: "none", border: "1.5px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-muted)", fontFamily: "Manrope,sans-serif", fontSize: 13, fontWeight: 600, padding: "9px 16px", cursor: "pointer", width: "100%", transition: "border-color 0.15s, color 0.15s" }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "var(--accent-blue)"; e.currentTarget.style.color = "var(--accent-blue)"; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-muted)"; }}>
             Réinitialiser
           </button>
         </aside>
@@ -323,7 +325,7 @@ export default function Marketplace() {
               {Array.from({ length: 12 }).map((_, i) => <Skeleton key={i} />)}
             </div>
           ) : cars.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "80px 0", border: "1px solid var(--border)", background: "var(--bg-off)" }}>
+            <div style={{ textAlign: "center", padding: "80px 0", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", background: "var(--bg-off)" }}>
               <p style={{ color: "var(--text-muted)", fontSize: 17, fontWeight: 600, margin: "0 0 8px" }}>Aucun véhicule trouvé</p>
               <p style={{ color: "var(--text-faint)", fontSize: 14, margin: 0 }}>Modifiez vos filtres</p>
             </div>
@@ -336,18 +338,18 @@ export default function Marketplace() {
               {lastPage > 1 && (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 40 }}>
                   <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                    style={{ padding: "8px 16px", border: "1px solid var(--border)", background: "none",
-                      cursor: page === 1 ? "not-allowed" : "pointer", opacity: page === 1 ? 0.4 : 1,
-                      fontFamily: "Manrope,sans-serif", fontSize: 14 }}>
+                    style={{ padding: "9px 20px", border: "1.5px solid var(--border)", borderRadius: "var(--radius-sm)", background: "none", cursor: page === 1 ? "not-allowed" : "pointer", opacity: page === 1 ? 0.4 : 1, fontFamily: "Manrope,sans-serif", fontSize: 13, fontWeight: 600, transition: "border-color 0.15s, color 0.15s" }}
+                    onMouseOver={e => { if (page !== 1) { e.currentTarget.style.borderColor = "var(--accent-blue)"; e.currentTarget.style.color = "var(--accent-blue)"; }}}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "inherit"; }}>
                     ← Précédent
                   </button>
-                  <span style={{ fontSize: 14, color: "var(--text-muted)", padding: "0 8px" }}>
-                    Page {page} / {lastPage}
+                  <span style={{ fontSize: 13, color: "var(--text-faint)", padding: "0 12px" }}>
+                    {page} / {lastPage}
                   </span>
                   <button onClick={() => setPage(p => Math.min(lastPage, p + 1))} disabled={page === lastPage}
-                    style={{ padding: "8px 16px", border: "1px solid var(--border)", background: "none",
-                      cursor: page === lastPage ? "not-allowed" : "pointer", opacity: page === lastPage ? 0.4 : 1,
-                      fontFamily: "Manrope,sans-serif", fontSize: 14 }}>
+                    style={{ padding: "9px 20px", border: "1.5px solid var(--border)", borderRadius: "var(--radius-sm)", background: "none", cursor: page === lastPage ? "not-allowed" : "pointer", opacity: page === lastPage ? 0.4 : 1, fontFamily: "Manrope,sans-serif", fontSize: 13, fontWeight: 600, transition: "border-color 0.15s, color 0.15s" }}
+                    onMouseOver={e => { if (page !== lastPage) { e.currentTarget.style.borderColor = "var(--accent-blue)"; e.currentTarget.style.color = "var(--accent-blue)"; }}}
+                    onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "inherit"; }}>
                     Suivant →
                   </button>
                 </div>

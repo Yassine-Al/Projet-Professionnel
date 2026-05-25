@@ -1,5 +1,11 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [pathname]);
+  return null;
+}
 import { axiosClient } from "../api/axios";
 import ChatWidget from "../components/ChatWidget";
 
@@ -183,6 +189,7 @@ export default function Layout() {
         )}
       </header>
 
+      <ScrollToTop />
       {/* ── Page Content ── */}
       <main style={{ flex: 1 }}><Outlet /></main>
 
@@ -203,9 +210,9 @@ export default function Layout() {
             </div>
             {[
               { title: "Plateforme", links: ["À propos", "Comment ça marche", "Espace revendeur", "Blog"] },
-              { title: "Légal", links: ["Conditions d'utilisation", "Politique de confidentialité", "Cookies"] },
-              { title: "Support", links: ["Centre d'aide", "Contact", "FAQ", "Signaler une annonce"] },
-            ].map(({ title, links }) => (
+              { title: "Légal", links: ["Conditions d'utilisation", "Politique de confidentialité"] },
+              { title: "Support", links: ["Centre d'aide", "Contact", "FAQ"] },
+          ].map(({ title, links }) => (
               <div key={title}>
                 <p style={{ fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.5px" }}>{title}</p>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>

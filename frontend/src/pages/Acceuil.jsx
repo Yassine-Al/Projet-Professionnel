@@ -26,14 +26,13 @@ function CarCard({ car }) {
   const price = Number(car.price).toLocaleString("fr-MA");
   const km    = Number(car.mileage).toLocaleString("fr-MA");
   return (
-    <Link to={`/cars/${car.id}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}
-      onMouseOver={e => { e.currentTarget.querySelector(".card-img")?.style && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1.05)"); e.currentTarget.style.boxShadow = "var(--shadow-2)"; }}
-      onMouseOut={e => { e.currentTarget.querySelector(".card-img")?.style && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1)"); e.currentTarget.style.boxShadow = "none"; }}
-      style={{ border: "1px solid var(--border)", background: "var(--bg-white)", transition: "box-shadow 0.2s ease" }}>
+    <Link to={`/cars/${car.id}`} style={{ textDecoration: "none", color: "inherit", display: "block", borderRadius: "var(--radius-md)", overflow: "hidden", background: "var(--bg-white)", border: "1px solid var(--border)", transition: "box-shadow 0.25s ease, transform 0.25s ease", boxShadow: "var(--shadow-xs)" }}
+      onMouseOver={e => { e.currentTarget.querySelector(".card-img") && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1.06)"); e.currentTarget.style.boxShadow = "var(--shadow-lg)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
+      onMouseOut={e => { e.currentTarget.querySelector(".card-img") && (e.currentTarget.querySelector(".card-img").style.transform = "scale(1)"); e.currentTarget.style.boxShadow = "var(--shadow-xs)"; e.currentTarget.style.transform = "translateY(0)"; }}>
       <div style={{ position: "relative", height: 200, overflow: "hidden", background: "var(--bg-off)" }}>
         {img ? (
           <img className="card-img" src={img} alt={`${car.brand} ${car.model}`} referrerPolicy="no-referrer"
-            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease" }} />
+            style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.45s cubic-bezier(0.4,0,0.2,1)" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="48" height="48" fill="none" stroke="var(--border)" strokeWidth={1.2} viewBox="0 0 24 24">
@@ -42,18 +41,21 @@ function CarCard({ car }) {
             </svg>
           </div>
         )}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)" }} />
-        {car.city && <span className="badge-dark" style={{ position: "absolute", top: 12, right: 12, fontSize: 11 }}>{car.city}</span>}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)" }} />
+        {car.city && <span className="badge-dark" style={{ position: "absolute", top: 12, right: 12 }}>{car.city}</span>}
       </div>
-      <div style={{ padding: 20 }}>
-        <p style={{ color: "var(--text-muted)", fontSize: 12, marginBottom: 4 }}>{car.model_year} · {car.fuel_type} · {km} km</p>
-        <h4 style={{ fontSize: 17, fontWeight: 700, margin: "0 0 12px", color: "var(--text-primary)" }}>{car.brand} {car.model}</h4>
+      <div style={{ padding: "18px 20px 20px" }}>
+        <p style={{ color: "var(--text-faint)", fontSize: 12, marginBottom: 5, fontWeight: 500 }}>{car.model_year} · {car.fuel_type} · {km} km</p>
+        <h4 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 14px", color: "var(--text-primary)", letterSpacing: "-0.01em" }}>{car.brand} {car.model}</h4>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
-            <span style={{ fontSize: 22, fontWeight: 800, color: "var(--accent-blue)" }}>{price}</span>
-            <span style={{ fontSize: 13, color: "var(--text-muted)", marginLeft: 4 }}>MAD</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: "var(--accent-blue)", fontFamily: "Manrope,sans-serif" }}>{price}</span>
+            <span style={{ fontSize: 12, color: "var(--text-faint)", marginLeft: 4 }}>MAD</span>
           </div>
-          <span style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 600 }}>Voir →</span>
+          <span style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 3 }}>
+            Voir
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </span>
         </div>
       </div>
     </Link>
@@ -62,12 +64,12 @@ function CarCard({ car }) {
 
 function CardSkeleton() {
   return (
-    <div style={{ border: "1px solid var(--border)", background: "var(--bg-white)" }}>
-      <div style={{ height: 200, background: "var(--bg-off)" }} />
-      <div style={{ padding: 20 }}>
-        <div style={{ height: 12, width: "60%", background: "var(--bg-off)", marginBottom: 10 }} />
-        <div style={{ height: 16, width: "80%", background: "var(--bg-off)", marginBottom: 14 }} />
-        <div style={{ height: 20, width: "40%", background: "var(--bg-off)" }} />
+    <div style={{ borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--border)", background: "var(--bg-white)" }}>
+      <div className="skeleton" style={{ height: 200, borderRadius: 0 }} />
+      <div style={{ padding: "18px 20px 20px" }}>
+        <div className="skeleton" style={{ height: 11, width: "55%", marginBottom: 10 }} />
+        <div className="skeleton" style={{ height: 15, width: "75%", marginBottom: 16 }} />
+        <div className="skeleton" style={{ height: 18, width: "38%" }} />
       </div>
     </div>
   );
@@ -179,9 +181,6 @@ export default function Acceuil() {
 
         <div className="container" style={{ position: "relative", paddingTop: 120, paddingBottom: 120 }}>
           <div style={{ maxWidth: 640 }} className="anim-up">
-            <div className="badge-primary" style={{ marginBottom: 20, fontSize: 12, letterSpacing: "0.5px" }}>
-              N°1 au Maroc pour les véhicules d'occasion
-            </div>
             <h1 style={{ color: "#fff", marginBottom: 20, fontSize: "clamp(36px, 5vw, 56px)" }}>
               Achetez & vendez votre voiture en toute confiance
             </h1>
@@ -190,14 +189,14 @@ export default function Acceuil() {
             </p>
 
             {/* Search bar */}
-            <div ref={inputWrapRef} style={{ position: "relative", maxWidth: 560 }}>
+            <div ref={inputWrapRef} style={{ position: "relative", maxWidth: 580 }}>
               <form onSubmit={e => { e.preventDefault(); setShowSugg(false); navigate(`/Marketplace${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}
-                style={{
-                  display: "flex",
-                  background: "#fff",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.35)",
-                  overflow: "hidden",
-                }}>
+                style={{ display: "flex", background: "rgba(255,255,255,0.96)", backdropFilter: "blur(12px)", borderRadius: "var(--radius-sm)", overflow: "visible", boxShadow: "0 8px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.15)" }}>
+                <div style={{ display: "flex", alignItems: "center", paddingLeft: 16, color: "var(--text-faint)" }}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </div>
                 <input
                   type="text"
                   value={query}
@@ -205,68 +204,29 @@ export default function Acceuil() {
                   onFocus={() => suggestions.length > 0 && setShowSugg(true)}
                   placeholder="Rechercher une marque, un modèle…"
                   autoComplete="off"
-                  style={{
-                    flex: 1,
-                    height: 52,
-                    padding: "0 20px",
-                    border: "none",
-                    outline: "none",
-                    fontFamily: "Inter, sans-serif",
-                    fontSize: 14,
-                    fontWeight: 400,
-                    color: "var(--text-secondary)",
-                    background: "transparent",
-                  }}
+                  style={{ flex: 1, height: 54, padding: "0 16px", border: "none", outline: "none", fontFamily: "Inter,sans-serif", fontSize: 15, color: "var(--text-primary)", background: "transparent" }}
                 />
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ flexShrink: 0, padding: "0 28px", height: 52, lineHeight: "52px" }}
-                >
-                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Rechercher
-                </button>
+                <div style={{ padding: "6px 6px 6px 0" }}>
+                  <button type="submit" className="btn-primary" style={{ height: 42, padding: "0 24px", fontSize: 14, borderRadius: "6px" }}>
+                    Rechercher
+                  </button>
+                </div>
               </form>
 
               {showSugg && suggestions.length > 0 && (
-                <div style={{
-                  position: "absolute", top: "100%", left: 0, right: 0,
-                  background: "#fff",
-                  borderTop: "1px solid #eee",
-                  zIndex: 100,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-                }}>
+                <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, background: "#fff", borderRadius: "var(--radius-sm)", zIndex: 100, boxShadow: "var(--shadow-xl)", border: "1px solid var(--border)", overflow: "hidden" }}>
                   {suggestions.map((s, i) => (
-                    <div
-                      key={i}
-                      onMouseDown={() => selectSuggestion(s.label)}
-                      style={{
-                        padding: "10px 16px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        borderBottom: i < suggestions.length - 1 ? "1px solid #f0f0f0" : "none",
-                        fontSize: 14,
-                        color: "var(--text-primary)",
-                      }}
-                      onMouseOver={e => e.currentTarget.style.background = "#f7f9fc"}
-                      onMouseOut={e => e.currentTarget.style.background = "transparent"}
-                    >
-                      <svg width="14" height="14" fill="none" stroke="#aaa" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                    <div key={i} onMouseDown={() => selectSuggestion(s.label)}
+                      style={{ padding: "11px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, borderBottom: i < suggestions.length - 1 ? "1px solid var(--bg-off)" : "none", fontSize: 14, color: "var(--text-primary)", transition: "background 0.12s" }}
+                      onMouseOver={e => e.currentTarget.style.background = "var(--bg-off)"}
+                      onMouseOut={e => e.currentTarget.style.background = "transparent"}>
+                      <svg width="14" height="14" fill="none" stroke="var(--text-faint)" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                         {s.type === "brand"
                           ? <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                          : <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
-                        }
+                          : <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>}
                       </svg>
                       <span style={{ flex: 1 }}>{s.label}</span>
-                      {s.type === "brand" && (
-                        <span style={{ fontSize: 11, color: "#aaa", background: "#f0f0f0", padding: "2px 6px" }}>
-                          Marque
-                        </span>
-                      )}
+                      {s.type === "brand" && <span className="badge-brand" style={{ fontSize: 10 }}>Marque</span>}
                     </div>
                   ))}
                 </div>
@@ -274,11 +234,11 @@ export default function Acceuil() {
             </div>
 
             {/* Stats row */}
-            <div style={{ display: "flex", gap: 40, marginTop: 48, flexWrap: "wrap" }} className="anim-up-1">
+            <div style={{ display: "flex", gap: 36, marginTop: 52, flexWrap: "wrap" }} className="anim-up-1">
               {STATS.map(({ val, label }) => (
-                <div key={label}>
-                  <p style={{ color: "#fff", fontWeight: 800, fontSize: 28, margin: 0 }}>{val}</p>
-                  <p style={{ color: "#aaa", fontSize: 13, margin: 0 }}>{label}</p>
+                <div key={label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <p style={{ color: "#fff", fontFamily: "Manrope,sans-serif", fontWeight: 800, fontSize: 26, margin: 0, letterSpacing: "-0.03em" }}>{val}</p>
+                  <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 12, margin: 0, fontWeight: 500 }}>{label}</p>
                 </div>
               ))}
             </div>
@@ -286,14 +246,14 @@ export default function Acceuil() {
         </div>
       </section>
 
-      {/* ── Quick Search Filters ── */}
-      <section className="scroll-section" style={{ background: "var(--accent-blue)", padding: "0" }}>
+      {/* ── Quick Brand Filters ── */}
+      <section style={{ background: "var(--bg-white)", borderBottom: "1px solid var(--border)", padding: "0" }}>
         <div className="container" style={{ display: "flex", gap: 0, overflowX: "auto" }}>
           {BRANDS.map(b => (
             <Link key={b} to={`/Marketplace?make=${b}`}
-              style={{ flexShrink: 0, padding: "0 20px", height: 52, lineHeight: "52px", color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500, textDecoration: "none", borderRight: "1px solid rgba(255,255,255,0.15)", whiteSpace: "nowrap", transition: "background 0.15s, color 0.15s" }}
-              onMouseOver={e => { e.target.style.background = "rgba(255,255,255,0.15)"; e.target.style.color = "#fff"; }}
-              onMouseOut={e => { e.target.style.background = "transparent"; e.target.style.color = "rgba(255,255,255,0.8)"; }}>
+              style={{ flexShrink: 0, padding: "0 18px", height: 48, lineHeight: "48px", color: "var(--text-muted)", fontSize: 13.5, fontWeight: 500, textDecoration: "none", borderRight: "1px solid var(--border)", whiteSpace: "nowrap", transition: "color 0.15s, background 0.15s" }}
+              onMouseOver={e => { e.target.style.color = "var(--accent-blue)"; e.target.style.background = "var(--bg-off)"; }}
+              onMouseOut={e => { e.target.style.color = "var(--text-muted)"; e.target.style.background = "transparent"; }}>
               {b}
             </Link>
           ))}
@@ -333,17 +293,19 @@ export default function Acceuil() {
             <p style={{ color: "var(--accent-blue)", fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 8 }}>Pourquoi ocazz.ma</p>
             <h2 style={{ margin: 0 }}>La confiance, notre priorité</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
             {TRUST.map((item, i) => (
               <div key={item.title} className={`anim-up-${i + 1}`}
-                style={{ background: "var(--bg-white)", padding: "40px 32px", borderLeft: i === 0 ? "4px solid var(--accent-blue)" : "1px solid var(--bg-off)" }}>
-                <div style={{ width: 52, height: 52, background: "#EBF3FF", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-                  <svg width="26" height="26" fill="none" stroke="var(--accent-blue)" viewBox="0 0 24 24" strokeWidth={1.5}>
+                style={{ background: "var(--bg-white)", padding: "36px 28px", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", boxShadow: "var(--shadow-xs)", transition: "box-shadow 0.25s, transform 0.25s" }}
+                onMouseOver={e => { e.currentTarget.style.boxShadow = "var(--shadow-md)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
+                onMouseOut={e => { e.currentTarget.style.boxShadow = "var(--shadow-xs)"; e.currentTarget.style.transform = "none"; }}>
+                <div style={{ width: 48, height: 48, background: "rgba(37,99,235,0.08)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                  <svg width="24" height="24" fill="none" stroke="var(--accent-blue)" viewBox="0 0 24 24" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                   </svg>
                 </div>
-                <h4 style={{ margin: "0 0 12px" }}>{item.title}</h4>
-                <p style={{ color: "var(--text-muted)", margin: 0, fontSize: 15, lineHeight: "22.5px" }}>{item.desc}</p>
+                <h4 style={{ margin: "0 0 10px", fontSize: 17 }}>{item.title}</h4>
+                <p style={{ color: "var(--text-muted)", margin: 0, fontSize: 14, lineHeight: "21px" }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -353,26 +315,27 @@ export default function Acceuil() {
       {/* ── AI Estimator CTA ── */}
       <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-white)" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, border: "1px solid var(--border)" }} className="responsive-grid">
-            <div style={{ background: "var(--accent-blue)", padding: "72px 52px", color: "#fff" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 16, opacity: 0.8 }}>Powered by Machine Learning</p>
-              <h2 style={{ color: "#fff", margin: "0 0 20px" }}>Combien vaut votre voiture ?</h2>
-              <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, lineHeight: "24px", marginBottom: 32 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, borderRadius: "var(--radius-lg)", overflow: "hidden", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)" }} className="responsive-grid">
+            <div style={{ background: "linear-gradient(135deg, var(--accent-blue) 0%, #1D4ED8 100%)", padding: "64px 48px", color: "#fff" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 16, opacity: 0.7 }}>Powered by Machine Learning</p>
+              <h2 style={{ color: "#fff", margin: "0 0 16px", fontSize: "clamp(22px,3vw,32px)" }}>Combien vaut votre voiture ?</h2>
+              <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 15, lineHeight: "23px", marginBottom: 32 }}>
                 Obtenez une estimation gratuite et précise en secondes grâce à notre moteur IA entraîné sur des milliers de transactions marocaines.
               </p>
-              <Link to="/Predict" style={{ background: "#fff", color: "var(--accent-blue)", padding: "0 32px", height: 60, lineHeight: "60px", display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 700, fontSize: 15, textDecoration: "none", transition: "background 0.15s" }}
-                onMouseOver={e => e.currentTarget.style.background = "var(--bg-off)"}
-                onMouseOut={e => e.currentTarget.style.background = "#fff"}>
-                Estimer maintenant →
+              <Link to="/Predict" style={{ background: "#fff", color: "var(--accent-blue)", padding: "0 28px", height: 52, lineHeight: "52px", display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "Manrope,sans-serif", fontWeight: 700, fontSize: 14, textDecoration: "none", borderRadius: "var(--radius-sm)", transition: "transform 0.15s, box-shadow 0.15s" }}
+                onMouseOver={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.2)"; }}
+                onMouseOut={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                Estimer maintenant
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
               </Link>
             </div>
-            <div style={{ background: "var(--bg-off)", padding: "72px 52px" }}>
-              <p style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: 24, color: "var(--text-muted)" }}>Facteurs analysés par notre IA</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ background: "var(--bg-off)", padding: "64px 48px" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: 24, color: "var(--text-faint)" }}>Facteurs analysés</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0 }}>
                 {["Marque & Modèle", "Année", "Kilométrage", "Carburant", "Boîte de vitesse", "Ville", "État général", "Saison"].map(f => (
-                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
-                    <div style={{ width: 8, height: 8, background: "var(--accent-blue)", flexShrink: 0 }} />
-                    <span style={{ fontSize: 14, color: "var(--text-secondary)" }}>{f}</span>
+                  <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 0", borderBottom: "1px solid var(--border)" }}>
+                    <div style={{ width: 6, height: 6, background: "var(--accent-blue)", borderRadius: "50%", flexShrink: 0 }} />
+                    <span style={{ fontSize: 13.5, color: "var(--text-secondary)" }}>{f}</span>
                   </div>
                 ))}
               </div>
@@ -384,11 +347,15 @@ export default function Acceuil() {
       {/* ── Sell CTA ── */}
       <section className="scroll-section" style={{ padding: "80px 0", background: "var(--bg-dark)" }}>
         <div className="container" style={{ textAlign: "center" }}>
+          <span className="badge-primary" style={{ marginBottom: 20, display: "inline-block" }}>100% gratuit</span>
           <h2 style={{ color: "#fff", margin: "0 0 16px" }}>Prêt à vendre votre voiture ?</h2>
-          <p style={{ color: "#888", fontSize: 18, marginBottom: 40, maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>
-            Publiez votre annonce gratuitement en moins de 5 minutes et touchez des milliers d'acheteurs qualifiés.
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 17, marginBottom: 40, maxWidth: 480, marginLeft: "auto", marginRight: "auto", lineHeight: "26px" }}>
+            Publiez votre annonce en moins de 5 minutes et touchez des milliers d'acheteurs qualifiés.
           </p>
-          <Link to="/sell" className="btn-primary" style={{ fontSize: 16 }}>Déposer une annonce gratuite</Link>
+          <Link to="/sell" className="btn-primary" style={{ fontSize: 15, height: 52, lineHeight: "52px", padding: "0 36px" }}>
+            Déposer une annonce
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </Link>
         </div>
       </section>
 

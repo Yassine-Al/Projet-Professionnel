@@ -215,7 +215,7 @@ export default function CarDetails() {
           {/* Left */}
           <div>
             {/* Gallery */}
-            <div style={{ border:"1px solid var(--border)", marginBottom:24 }}>
+            <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", marginBottom:24 }}>
               {imgs.length > 0 ? (
                 <>
                   <div style={{ position:"relative", height:420, overflow:"hidden", background:"var(--bg-off)", cursor:"zoom-in" }}
@@ -262,7 +262,7 @@ export default function CarDetails() {
             </div>
 
             {/* Specs */}
-            <div style={{ border:"1px solid var(--border)", padding:"24px 24px 28px", marginBottom:24 }}>
+            <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", padding:"24px 24px 28px", marginBottom:24 }}>
               <h3 style={{ fontSize:22, margin:"0 0 20px" }}>Caractéristiques</h3>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(160px,1fr))", gap:12 }}>
                 <Spec label="Année"       value={car.model_year} />
@@ -279,14 +279,14 @@ export default function CarDetails() {
             </div>
 
             {/* Description */}
-            <div style={{ border:"1px solid var(--border)", padding:"24px", marginBottom:24 }}>
+            <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", padding:"24px", marginBottom:24 }}>
               <h3 style={{ fontSize:22, margin:"0 0 16px" }}>Description</h3>
               <p style={{ color:"var(--text-secondary)", lineHeight:"24px", margin:0, whiteSpace:"pre-line" }}>{car.description}</p>
             </div>
 
             {/* Equipment options */}
             {features.length > 0 && (
-              <div style={{ border:"1px solid var(--border)", padding:"24px" }}>
+              <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", padding:"24px" }}>
                 <h3 style={{ fontSize:22, margin:"0 0 20px" }}>Équipements</h3>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
                   {features.map(f => (
@@ -303,7 +303,7 @@ export default function CarDetails() {
           {/* Right Sidebar */}
           <div style={{ position:"sticky", top:100 }}>
             {/* Price card */}
-            <div style={{ border:"1px solid var(--border)", padding:"24px", marginBottom:20 }}>
+            <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", padding:"24px", marginBottom:20 }}>
               {car.city && <p style={{ color:"var(--text-muted)", fontSize:13, margin:"0 0 8px" }}>{car.city}</p>}
               <h2 style={{ margin:"0 0 4px", fontSize:20 }}>{car.model_year} {car.brand} {car.model}</h2>
               <p style={{ fontSize:36, fontWeight:800, color:"var(--accent-blue)", margin:"12px 0 4px" }}>
@@ -316,7 +316,7 @@ export default function CarDetails() {
             </div>
 
             {/* Message form */}
-            <div style={{ border:"1px solid var(--border)", padding:"24px" }}>
+            <div style={{ border:"1px solid var(--border)", borderRadius:"var(--radius-md)", boxShadow:"var(--shadow-xs)", padding:"24px" }}>
               <h4 style={{ margin:"0 0 4px", fontSize:18 }}>Envoyer un message</h4>
               <p style={{ color:"var(--text-muted)", fontSize:13, margin:"0 0 20px" }}>Posez une question directement au vendeur.</p>
               {sent ? (
