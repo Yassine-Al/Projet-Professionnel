@@ -49,12 +49,12 @@ function Lightbox({ imgs, index, onClose, onPrev, onNext }) {
   return (
     <div
       onClick={onClose}
-      style={{ position:"fixed", inset:0, zIndex:2000, background:"rgba(0,0,0,0.93)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}
+      style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(0,0,0,0.93)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}
     >
       {/* Close */}
       <button
-        onClick={onClose}
-        style={{ position:"absolute", top:18, right:22, background:"none", border:"none", color:"#fff", cursor:"pointer", padding:8, lineHeight:1 }}
+        onClick={e => { e.stopPropagation(); onClose(); }}
+        style={{ position:"absolute", top:18, right:22, background:"none", border:"none", color:"#fff", cursor:"pointer", padding:8, lineHeight:1, zIndex:1 }}
       >
         <svg width="28" height="28" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -186,10 +186,13 @@ export default function CarDetails() {
     if (!user) { navigate(`/Login?redirect=/cars/${id}`); return; }
     setSending(true);
     try {
-      await axiosClient.post("/conversations", { annonce_id: car.id, message: msg });
+      // Step 1: create or retrieve the conversation
+      const convRes = await axiosClient.post("/conversations", { annonce_id: car.id });
+      const convId = convRes.data?.data?.id ?? convRes.data?.id;
+      // Step 2: send the actual message in that conversation
+      await axiosClient.post(`/conversations/${convId}/messages`, { content: msg });
       setSent(true);
     } catch {
-      // conversation may already exist — still navigate to messages
       navigate("/messages");
     } finally {
       setSending(false);
@@ -230,11 +233,11 @@ export default function CarDetails() {
                       {activeImg+1} / {imgs.length}
                     </div>
                     {imgs.length > 1 && <>
-                      <button onClick={() => setActiveImg(i => (i-1+imgs.length)%imgs.length)}
+                      <button onClick={e => { e.stopPropagation(); setActiveImg(i => (i-1+imgs.length)%imgs.length); }}
                         style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)", width:40, height:40, background:"rgba(255,255,255,0.9)", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
                       </button>
-                      <button onClick={() => setActiveImg(i => (i+1)%imgs.length)}
+                      <button onClick={e => { e.stopPropagation(); setActiveImg(i => (i+1)%imgs.length); }}
                         style={{ position:"absolute", right:12, top:"50%", transform:"translateY(-50%)", width:40, height:40, background:"rgba(255,255,255,0.9)", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>
                         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                       </button>
@@ -309,10 +312,7 @@ export default function CarDetails() {
               <p style={{ fontSize:36, fontWeight:800, color:"var(--accent-blue)", margin:"12px 0 4px" }}>
                 {price}<span style={{ fontSize:16, color:"var(--text-muted)", fontWeight:400, marginLeft:6 }}>MAD</span>
               </p>
-              <p style={{ color:"var(--text-muted)", fontSize:13, margin:"0 0 20px" }}>{km} km · {car.fuel_type}</p>
-              <Link to="/messages" className="btn-primary" style={{ display:"block", textAlign:"center", marginBottom:8 }}>
-                Contacter le vendeur
-              </Link>
+              <p style={{ color:"var(--text-muted)", fontSize:13, margin:0 }}>{km} km · {car.fuel_type}</p>
             </div>
 
             {/* Message form */}

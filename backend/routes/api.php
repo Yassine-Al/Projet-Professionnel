@@ -120,13 +120,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('conversations/{conversation}/messages', [MessageController::class, 'store']);
     Route::post('conversations/{conversation}/messages/read', [MessageController::class, 'markAllRead']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | PREDICTION (FASTAPI ML SERVICE)
-    |--------------------------------------------------------------------------
-    */
-    Route::post('predict-price', [PredictionController::class, 'predict']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| PREDICTION — public (no auth required)
+|--------------------------------------------------------------------------
+*/
+Route::post('predict-price', [PredictionController::class, 'predict']);
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
@@ -136,6 +137,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
 
     Route::get('/admin/annonces', [AdminController::class, 'annonces']);
+    Route::get('/admin/annonces/{id}', [AdminController::class, 'annonce']);
+    Route::delete('/admin/annonces/{id}', [AdminController::class, 'deleteAnnonce']);
 
     Route::post('/admin/annonces/{id}/approve', [AdminController::class, 'approveAnnonce']);
     Route::post('/admin/annonces/{id}/reject', [AdminController::class, 'rejectAnnonce']);

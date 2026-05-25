@@ -97,7 +97,7 @@ export default function Predict() {
     };
 
     try {
-      const { data } = await axiosClient.post("/predict", payload);
+      const { data } = await axiosClient.post("/predict-price", payload);
       if (data.success) {
         setResult({ min: data.min, mid: data.price, max: data.max });
       } else {

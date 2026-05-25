@@ -10,40 +10,33 @@ class PredictionController extends Controller
     public function predict(Request $request)
     {
         $request->validate([
-            'brand'          => 'required|string',
-            'model'          => 'required|string',
-            'model_year'     => 'required|integer|min:1900|max:' . date('Y'),
-            'mileage'        => 'required|integer|min:0',
-            'fuel_type'      => 'required|string',
-            'transmission'   => 'required|string',
-            'car_condition'  => 'required|string',
-            'fiscal_power'   => 'nullable|integer|min:1',
-            'origine'        => 'nullable|string',
+            'etat'              => 'required|string',
+            'boite-de-vitesses' => 'required|string',
+            'type-de-carburant' => 'required|string',
+            'marque'            => 'required|string',
+            'modele'            => 'required|string',
+            'origine'           => 'required|string',
+            'kilometrage'       => 'required|integer|min:0',
+            'annee'             => 'required|integer|min:1900|max:' . date('Y'),
+            'puissance-fiscale' => 'required|integer|min:1',
         ]);
 
-        $response = Http::post(env('PREDICTION_SERVICE_URL', 'http://127.0.0.1:8001') . '/predict', [
-            'etat'              => $request->car_condition,
-            'boite-de-vitesses' => $request->transmission,
-            'type-de-carburant' => $request->fuel_type,
-            'marque'            => $request->brand,
-            'modele'            => $request->model,
-            'origine'           => $request->input('origine', 'WW au Maroc'),
-            'kilometrage'       => $request->mileage,
-            'annee'             => $request->model_year,
-            'puissance-fiscale' => $request->input('fiscal_power', 6),
-        ]);
+        $response = Http::post(
+            env('PREDICTION_SERVICE_URL', 'http://127.0.0.1:5000') . '/predict',
+            $request->only([
+                'etat', 'boite-de-vitesses', 'type-de-carburant',
+                'marque', 'modele', 'origine',
+                'kilometrage', 'annee', 'puissance-fiscale',
+            ])
+        );
 
-        // 4. check erreur API
         if ($response->failed()) {
             return response()->json([
-                'message' => 'Prediction service unavailable'
-            ], 500);
+                'success' => false,
+                'error'   => $response->json('error') ?? 'Le service de prédiction est indisponible.',
+            ], 503);
         }
 
-        // 5. return résultat propre
-        return response()->json([
-            'message' => 'Prediction success',
-            'price_estimation' => $response->json()['price'] ?? null
-        ]);
+        return response()->json($response->json());
     }
 }

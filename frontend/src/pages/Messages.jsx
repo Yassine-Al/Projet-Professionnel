@@ -113,7 +113,8 @@ export default function Messages() {
     setText("");
     try {
       const res = await axiosClient.post(`/conversations/${activeConv.id}/messages`, { content });
-      setMessages(ms => ms.map(m => m.id === optimistic.id ? res.data : m));
+      const sent = res.data?.data ?? res.data;
+      setMessages(ms => ms.map(m => m.id === optimistic.id ? sent : m));
       loadConversations();
     } catch (err) {
       setMessages(ms => ms.filter(m => m.id !== optimistic.id));

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { axiosClient } from "../api/axios";
 
@@ -75,16 +75,33 @@ export default function SellYourCar() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading]     = useState(false);
   const [errors, setErrors]       = useState({});
+  const [photos, setPhotos]       = useState([]); // [{file, preview}]
   const [form, setForm] = useState({
     brand: "", model: "", model_year: "", mileage: "",
     fuel_type: "", transmission: "", car_condition: "", fiscal_power: "",
     price: "", description: "",
   });
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   if (!getUser()) return <GuestLanding />;
 
   const set = k => e => { setForm(f => ({ ...f, [k]: e.target.value })); setErrors(e => ({ ...e, [k]: undefined })); };
+
+  const onFilePick = e => {
+    const files = Array.from(e.target.files);
+    const remaining = 8 - photos.length;
+    const picked = files.slice(0, remaining).map(file => ({ file, preview: URL.createObjectURL(file) }));
+    setPhotos(prev => [...prev, ...picked]);
+    e.target.value = "";
+  };
+
+  const removePhoto = idx => {
+    setPhotos(prev => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
 
   const validateStep1 = () => {
     const e = {};
@@ -120,7 +137,10 @@ export default function SellYourCar() {
     setErrors({});
     try {
       const title = `${form.brand} ${form.model} ${form.model_year}`;
-      await axiosClient.post("/annonces", { ...form, title });
+      const fd = new FormData();
+      Object.entries({ ...form, title }).forEach(([k, v]) => fd.append(k, v));
+      photos.forEach(({ file }) => fd.append("images[]", file));
+      await axiosClient.post("/annonces", fd, { headers: { "Content-Type": "multipart/form-data" } });
       setSubmitted(true);
     } catch (err) {
       if (err.response?.data?.errors) {
@@ -153,7 +173,7 @@ export default function SellYourCar() {
             Notre équipe examinera votre annonce dans les 24h. Vous serez notifié par email dès sa publication.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-            <button onClick={() => { setSubmitted(false); setStep(1); setForm({ brand:"",model:"",model_year:"",mileage:"",fuel_type:"",transmission:"",car_condition:"",fiscal_power:"",price:"",description:"" }); }}
+            <button onClick={() => { setSubmitted(false); setStep(1); setPhotos([]); setForm({ brand:"",model:"",model_year:"",mileage:"",fuel_type:"",transmission:"",car_condition:"",fiscal_power:"",price:"",description:"" }); }}
               className="btn-secondary">
               Nouvelle annonce
             </button>
@@ -242,14 +262,52 @@ export default function SellYourCar() {
                     style={{ minHeight: 140, borderColor: errors.description ? "var(--error)" : undefined }}/>
                 </Field>
 
-                <div style={{ border: "2px dashed var(--border)", padding: "40px 20px", textAlign: "center", cursor: "pointer" }}
-                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--accent-blue)"}
-                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}>
-                  <svg width="40" height="40" fill="none" stroke="var(--text-faint)" viewBox="0 0 24 24" style={{ marginBottom: 12 }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                  <p style={{ fontWeight: 600, margin: "0 0 4px", color: "var(--text-secondary)" }}>Ajouter des photos</p>
-                  <p style={{ color: "var(--text-faint)", fontSize: 13, margin: 0 }}>PNG, JPG · Max 10 MB · 8 photos max</p>
+                {/* Photo upload */}
+                <div>
+                  <label className="form-label">Photos ({photos.length}/8)</label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={onFilePick}
+                    style={{ display: "none" }}
+                  />
+
+                  {photos.length > 0 && (
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))", gap: 10, marginBottom: 12 }}>
+                      {photos.map(({ preview }, idx) => (
+                        <div key={idx} style={{ position: "relative", aspectRatio: "1", borderRadius: "var(--radius-sm)", overflow: "hidden", border: "1px solid var(--border)" }}>
+                          <img src={preview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(idx)}
+                            style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, lineHeight: 1 }}
+                          >×</button>
+                          {idx === 0 && (
+                            <span style={{ position: "absolute", bottom: 4, left: 4, background: "var(--accent-blue)", color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: "99px" }}>Principal</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {photos.length < 8 && (
+                    <div
+                      onClick={() => fileInputRef.current.click()}
+                      style={{ border: "2px dashed var(--border)", borderRadius: "var(--radius-md)", padding: "32px 20px", textAlign: "center", cursor: "pointer", transition: "border-color 0.15s, background 0.15s" }}
+                      onMouseOver={e => { e.currentTarget.style.borderColor = "var(--accent-blue)"; e.currentTarget.style.background = "rgba(37,99,235,0.03)"; }}
+                      onMouseOut={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "transparent"; }}
+                    >
+                      <svg width="36" height="36" fill="none" stroke="var(--text-faint)" viewBox="0 0 24 24" style={{ marginBottom: 10 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      <p style={{ fontWeight: 600, margin: "0 0 4px", color: "var(--text-secondary)", fontSize: 14 }}>
+                        {photos.length === 0 ? "Cliquez pour ajouter des photos" : "Ajouter d'autres photos"}
+                      </p>
+                      <p style={{ color: "var(--text-faint)", fontSize: 12, margin: 0 }}>PNG, JPG · Max 10 MB · {8 - photos.length} emplacement{8 - photos.length > 1 ? "s" : ""} restant{8 - photos.length > 1 ? "s" : ""}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: "flex", gap: 12 }}>

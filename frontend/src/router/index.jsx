@@ -14,6 +14,9 @@ import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminAnnonces from "../pages/admin/AdminAnnonces";
 import AdminUsers from "../pages/admin/AdminUsers";
+import Contact from "../pages/static/Contact";
+import FAQ from "../pages/static/FAQ";
+import { About, HowItWorks, EspaceRevendeur, Conditions, Confidentialite, CentreAide, Blog } from "../pages/static/StaticPages";
 
 export const User_Dashboard = '/User/dashboard';
 
@@ -39,6 +42,15 @@ export const router = createBrowserRouter([
             { path: "/cars/:id",       element: <CarDetails /> },
             { path: "/messages",       element: <Messages /> },
             { path: "/User/Dashboard", element: <p style={{ padding: 40, fontFamily: "Manrope,sans-serif" }}>Tableau de bord utilisateur — à venir.</p> },
+            { path: "/about",               element: <About /> },
+            { path: "/how-it-works",        element: <HowItWorks /> },
+            { path: "/espace-revendeur",    element: <EspaceRevendeur /> },
+            { path: "/blog",                element: <Blog /> },
+            { path: "/conditions",          element: <Conditions /> },
+            { path: "/confidentialite",     element: <Confidentialite /> },
+            { path: "/aide",                element: <CentreAide /> },
+            { path: "/contact",             element: <Contact /> },
+            { path: "/faq",                 element: <FAQ /> },
         ],
     },
 

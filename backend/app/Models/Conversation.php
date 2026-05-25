@@ -67,9 +67,9 @@ class Conversation extends Model
 
     public function getUnreadCountFor(int $userId): int
     {
-        return $userId === $this->buyer_id
+        return (int) ($userId === $this->buyer_id
             ? $this->buyer_unread_count
-            : $this->seller_unread_count;
+            : $this->seller_unread_count);
     }
 
     public function getUnreadFieldFor(int $userId): string

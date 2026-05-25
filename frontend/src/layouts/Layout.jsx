@@ -9,6 +9,18 @@ function ScrollToTop() {
 import { axiosClient } from "../api/axios";
 import ChatWidget from "../components/ChatWidget";
 
+const FOOTER_PATHS = {
+  "À propos":                    "/about",
+  "Comment ça marche":           "/how-it-works",
+  "Espace revendeur":            "/espace-revendeur",
+  "Blog":                        "/blog",
+  "Conditions d'utilisation":    "/conditions",
+  "Politique de confidentialité": "/confidentialite",
+  "Centre d'aide":               "/aide",
+  "Contact":                     "/contact",
+  "FAQ":                         "/faq",
+};
+
 const NAV = [
   { label: "Accueil",              path: "/" },
   { label: "Acheter une voiture",  path: "/Marketplace" },
@@ -216,7 +228,7 @@ export default function Layout() {
               <div key={title}>
                 <p style={{ fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.5px" }}>{title}</p>
                 <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                  {links.map(l => <li key={l} style={{ marginBottom: 10 }}><a href="#" style={{ color: "#888", fontSize: 14, textDecoration: "none", transition: "color 0.15s" }} onMouseOver={e => e.target.style.color="#fff"} onMouseOut={e => e.target.style.color="#888"}>{l}</a></li>)}
+                  {links.map(l => <li key={l} style={{ marginBottom: 10 }}><Link to={FOOTER_PATHS[l] ?? "/"} style={{ color: "#888", fontSize: 14, textDecoration: "none", transition: "color 0.15s" }} onMouseOver={e => e.currentTarget.style.color="#fff"} onMouseOut={e => e.currentTarget.style.color="#888"}>{l}</Link></li>)}
                 </ul>
               </div>
             ))}

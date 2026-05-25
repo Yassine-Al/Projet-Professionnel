@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Annonce;
+use App\Models\Image;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AnnonceController extends Controller
 {
@@ -85,37 +87,49 @@ class AnnonceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-            'price' => 'required|numeric',
-            'brand' => 'required',
-            'model' => 'required',
-            'model_year' => 'required|integer',
-            'mileage' => 'required|integer',
-            'fuel_type' => 'required',
+            'title'        => 'required',
+            'description'  => 'required',
+            'price'        => 'required|numeric',
+            'brand'        => 'required',
+            'model'        => 'required',
+            'model_year'   => 'required|integer',
+            'mileage'      => 'required|integer',
+            'fuel_type'    => 'required',
             'transmission' => 'required',
-            'car_condition' => 'required',
+            'car_condition'=> 'required',
+            'images'       => 'nullable|array|max:8',
+            'images.*'     => 'image|max:10240',
         ]);
 
         $annonce = Annonce::create([
-            'user_id' => auth()->id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'price' => $request->price,
-            'brand' => $request->brand,
-            'model' => $request->model,
-            'model_year' => $request->model_year,
-            'mileage' => $request->mileage,
-            'fuel_type' => $request->fuel_type,
+            'user_id'      => auth()->id(),
+            'title'        => $request->title,
+            'description'  => $request->description,
+            'price'        => $request->price,
+            'brand'        => $request->brand,
+            'model'        => $request->model,
+            'model_year'   => $request->model_year,
+            'mileage'      => $request->mileage,
+            'fuel_type'    => $request->fuel_type,
             'transmission' => $request->transmission,
             'fiscal_power' => $request->fiscal_power,
-            'car_condition' => $request->car_condition,
-            'status' => 'pending',
+            'car_condition'=> $request->car_condition,
+            'status'       => 'pending',
         ]);
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $path = $file->store("annonces/{$annonce->id}", 'public');
+                Image::create([
+                    'annonce_id' => $annonce->id,
+                    'url'        => Storage::disk('public')->url($path),
+                ]);
+            }
+        }
 
         return response()->json([
             'message' => 'Annonce created successfully',
-            'data' => $annonce
+            'data'    => $annonce->load('images'),
         ]);
     }
 

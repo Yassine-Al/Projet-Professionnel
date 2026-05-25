@@ -46,17 +46,65 @@ def health():
     })
 
 
+# ── Heuristic fallback (used when ML pipeline is not loaded) ──────────────────
+# Base = realistic "new equivalent" price on the Moroccan market in MAD
+BRAND_BASE = {
+    'dacia': 160000, 'renault': 190000, 'peugeot': 200000, 'citroën': 185000,
+    'fiat': 160000, 'ford': 210000, 'volkswagen': 270000, 'opel': 175000,
+    'seat': 200000, 'skoda': 220000, 'audi': 450000, 'bmw': 500000,
+    'mercedes': 550000, 'toyota': 280000, 'hyundai': 200000, 'kia': 195000,
+    'honda': 230000, 'nissan': 220000, 'land rover': 800000, 'volvo': 420000,
+}
+
+CONDITION_MULT = {
+    'neuf': 1.00, 'excellent': 0.92, 'très bon': 0.82,
+    'bon': 0.72, 'correct': 0.60, 'endommagé': 0.35, 'pour pièces': 0.12,
+}
+
+def heuristic_price(data: dict) -> float:
+    brand  = str(data.get('marque', '')).lower().strip()
+    base   = BRAND_BASE.get(brand, 200000)
+
+    age    = max(0, datetime.now().year - int(data.get('annee', datetime.now().year - 5)))
+
+    # Moroccan market depreciates ~8 % / year (gentler than Europe — import taxes keep values high)
+    price  = base * (0.92 ** age)
+
+    # Mileage vs expected (15 000 km/year average): ±0.25 MAD/km difference
+    km          = int(data.get('kilometrage', 0))
+    expected_km = age * 15000
+    price      += (expected_km - km) * 0.25   # under-average km → bonus, over → penalty
+    price       = max(price, base * 0.12)      # floor at 12 % of base
+
+    # Condition multiplier
+    cond   = str(data.get('etat', 'Bon')).lower().strip()
+    price *= CONDITION_MULT.get(cond, 0.72)
+
+    # Fuel type
+    fuel = str(data.get('type-de-carburant', '')).lower()
+    if fuel == 'diesel':      price *= 1.07
+    elif fuel == 'hybride':   price *= 1.12
+    elif fuel == 'electrique': price *= 1.25
+
+    # Transmission
+    if str(data.get('boite-de-vitesses', '')).lower() == 'automatique':
+        price *= 1.10
+
+    # Origine
+    origine = str(data.get('origine', '')).lower()
+    if 'import' in origine:  price *= 1.14
+    elif 'douané' in origine: price *= 0.90
+
+    # Fiscal power: +2 % per CV above 6
+    cv     = int(data.get('puissance-fiscale', 6))
+    price *= 1 + max(0, cv - 6) * 0.02
+
+    return max(price, 8000.0)
+
+
 # ── Prediction endpoint ────────────────────────────────────────────────────────
 @app.route('/predict', methods=['POST'])
 def predict():
-    if pipeline is None:
-        return jsonify({
-            'error': (
-                "Le modèle de prédiction n'est pas encore disponible. "
-                "Exécutez generate_pipeline.py pour générer final_pipeline.pkl."
-            )
-        }), 503
-
     data = request.get_json(force=True)
 
     required_fields = ['marque', 'modele', 'annee', 'kilometrage', 'etat',
@@ -93,7 +141,10 @@ def predict():
         return jsonify({'error': f'Données invalides : {e}'}), 400
 
     try:
-        raw_price = float(pipeline.predict(df)[0])
+        if pipeline is not None:
+            raw_price = float(pipeline.predict(df)[0])
+        else:
+            raw_price = heuristic_price(data)
     except Exception as e:
         return jsonify({'error': f'Erreur de prédiction : {e}'}), 500
 
@@ -114,4 +165,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8001, debug=True)
+    app.run(host='127.0.0.1', port=5000, debug=True)
