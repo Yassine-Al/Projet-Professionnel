@@ -289,37 +289,7 @@ export default function Predict() {
               ))}
             </div>
 
-            {/* Template info box */}
-            <div style={{ background: "#F5F3FF", borderLeft: "4px solid #7C3AED", padding: "20px" }}>
-              <p style={{ fontWeight: 700, color: "#5B21B6", margin: "0 0 10px", fontSize: 13 }}>
-                Champs analysés par le modèle
-              </p>
-              {[
-                ["État",             "etat",               "Ordinal"],
-                ["Boîte",           "boite-de-vitesses",  "Catégoriel"],
-                ["Carburant",       "type-de-carburant",  "Catégoriel"],
-                ["Marque / Modèle", "marque + modele",    "Catégoriel"],
-                ["Origine",         "origine",            "Catégoriel"],
-                ["Kilométrage",     "kilometrage",        "Numérique"],
-                ["Âge",             "2026 − année",       "Numérique"],
-                ["Puissance",       "puissance-fiscale",  "Numérique"],
-              ].map(([label, col]) => (
-                <div key={col} style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: "#6B7280" }}>{label}</span>
-                  <code style={{
-                    fontSize: 11, background: "#EDE9FE", color: "#6D28D9",
-                    padding: "1px 6px", borderRadius: 3,
-                  }}>{col}</code>
-                </div>
-              ))}
-            </div>
 
-            <div style={{ background: "var(--bg-off)", borderLeft: "4px solid var(--success)", padding: "20px" }}>
-              <p style={{ fontWeight: 700, color: "var(--success)", margin: "0 0 6px" }}>Fiabilité 94 %</p>
-              <p style={{ color: "var(--text-muted)", fontSize: 14, margin: 0, lineHeight: "21px" }}>
-                Notre modèle est entraîné sur plus de 50 000 transactions réelles au Maroc.
-              </p>
-            </div>
           </div>
 
         </div>
