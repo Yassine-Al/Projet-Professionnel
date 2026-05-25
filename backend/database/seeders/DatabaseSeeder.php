@@ -15,10 +15,13 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
 
-        \App\Models\User::factory()->create([
-            'name' => 'Yassine',
-            'email' => 'yassinealami2003@gmail.com',
-            'password' => Hash::make('azertywxcv'),
-        ]);
+        \App\Models\User::updateOrCreate(
+            ['email' => 'admin@ocazz.ma'],
+            [
+                'name'     => 'Admin',
+                'password' => Hash::make('Admin@1234'),
+                'role'     => 'admin',
+            ]
+        );
     }
 }

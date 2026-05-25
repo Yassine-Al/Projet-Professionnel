@@ -11,6 +11,36 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
+     * Register a new user and return a Sanctum token.
+     */
+    public function register(Request $request)
+    {
+        $data = $request->validate([
+            'name'      => 'required|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email'     => 'required|email|unique:users',
+            'phone'     => 'nullable|string|max:20',
+            'password'  => 'required|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name'      => $data['name'],
+            'last_name' => $data['last_name'] ?? null,
+            'email'     => $data['email'],
+            'phone'     => $data['phone'] ?? null,
+            'password'  => Hash::make($data['password']),
+        ]);
+
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'user'  => $user,
+            'token' => $token,
+        ], 201);
+    }
+
+
+    /**
      * Login and return a Sanctum token.
      */
     public function login(Request $request)

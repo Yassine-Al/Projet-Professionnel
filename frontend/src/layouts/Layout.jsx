@@ -1,12 +1,17 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { axiosClient } from "../api/axios";
 
 const NAV = [
-  { label: "Accueil", path: "/" },
-  { label: "Acheter une voiture", path: "/Marketplace" },
-  { label: "Vendre une voiture", path: "/sell" },
-  { label: "Estimation de prix", path: "/Predict" },
+  { label: "Accueil",              path: "/" },
+  { label: "Acheter une voiture",  path: "/Marketplace" },
+  { label: "Vendre une voiture",   path: "/sell", auth: true },
+  { label: "Estimation de prix",   path: "/Predict" },
 ];
+
+function getUser() {
+  try { return JSON.parse(localStorage.getItem("user")); } catch { return null; }
+}
 
 function Logo() {
   return (
@@ -27,8 +32,29 @@ function Logo() {
 export default function Layout() {
   const [open, setOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [user, setUser] = useState(getUser);
+  const [unread, setUnread] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
   const isHome = location.pathname === "/";
+
+  useEffect(() => { setUser(getUser()); }, [location.pathname]);
+
+  useEffect(() => {
+    if (!user) return;
+    axiosClient.get("/unread-count")
+      .then(r => setUnread(r.data.unread_count ?? 0))
+      .catch(() => {});
+  }, [user, location.pathname]);
+
+  const handleLogout = async () => {
+    try { await axiosClient.post("/logout"); } catch { /* ignore */ }
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setUnread(0);
+    navigate("/Login");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,21 +83,63 @@ export default function Layout() {
 
           {/* Desktop Nav */}
           <nav style={{ display: "flex", alignItems: "center" }} className="hide-mobile">
-            {NAV.map(({ label, path }) => (
+            {NAV.filter(({ auth }) => !auth || user).map(({ label, path }) => (
               <Link key={label} to={path} className={`nav-link ${location.pathname === path ? "active" : ""}`} style={{ color: location.pathname === path ? "var(--brand-blue)" : "#fff" }}>
                 {label}
               </Link>
             ))}
           </nav>
 
-          {/* Auth */}
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }} className="hide-mobile">
-            <Link to="/Login" className="btn-ghost" style={{ height: 44, lineHeight: "44px", padding: "0 16px", fontSize: 15, color: "#fff" }}>
-              Connexion
-            </Link>
-            <Link to="/Register" className="btn-primary" style={{ height: 44, lineHeight: "44px", padding: "0 24px", fontSize: 15 }}>
-              Créer un compte
-            </Link>
+          {/* Auth / user actions */}
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }} className="hide-mobile">
+            {user ? (
+              <>
+                {/* Messages icon with badge */}
+                <Link to="/messages" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, color: location.pathname === "/messages" ? "var(--accent-blue)" : "#fff", textDecoration: "none", transition: "color 0.15s" }}
+                  title="Messages">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                  </svg>
+                  {unread > 0 && (
+                    <span style={{ position: "absolute", top: 4, right: 4, width: 8, height: 8, background: "var(--error)", borderRadius: "50%", border: "2px solid transparent" }} />
+                  )}
+                </Link>
+
+                {/* Admin link (admin only) */}
+                {user.role === "admin" && (
+                  <Link to="/admin" style={{ display: "flex", alignItems: "center", gap: 5, color: "#fff", textDecoration: "none", fontSize: 13, fontWeight: 500, opacity: 0.85, transition: "opacity 0.15s", padding: "0 8px", height: 40 }}
+                    title="Administration"
+                    onMouseOver={e => e.currentTarget.style.opacity = "1"}
+                    onMouseOut={e => e.currentTarget.style.opacity = "0.85"}>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Admin
+                  </Link>
+                )}
+
+                {/* User name + logout */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
+                  <div style={{ width: 32, height: 32, background: "var(--accent-blue)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontFamily: "Manrope, sans-serif", fontWeight: 700, fontSize: 13 }}>
+                    {user.name?.charAt(0).toUpperCase() ?? "?"}
+                  </div>
+                  <span style={{ color: "#fff", fontSize: 13, fontWeight: 500, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</span>
+                </div>
+                <button onClick={handleLogout} className="btn-ghost" style={{ height: 40, lineHeight: "40px", padding: "0 12px", fontSize: 13, color: "#aaa" }}>
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/Login" className="btn-ghost" style={{ height: 44, lineHeight: "44px", padding: "0 16px", fontSize: 15, color: "#fff" }}>
+                  Connexion
+                </Link>
+                <Link to="/Register" className="btn-primary" style={{ height: 44, lineHeight: "44px", padding: "0 24px", fontSize: 15 }}>
+                  Créer un compte
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Hamburger */}
@@ -87,15 +155,28 @@ export default function Layout() {
         {/* Mobile menu */}
         {open && (
           <div style={{ background: "#000", borderTop: "1px solid #333", padding: "16px 16px 24px" }} className="anim-fade">
-            {NAV.map(({ label, path }) => (
+            {NAV.filter(({ auth }) => !auth || user).map(({ label, path }) => (
               <Link key={label} to={path} onClick={() => setOpen(false)}
                 style={{ display: "block", padding: "14px 0", color: location.pathname === path ? "var(--brand-blue)" : "#fff", fontWeight: location.pathname === path ? 600 : 400, fontSize: 17, textDecoration: "none", borderBottom: "1px solid #333" }}>
                 {label}
               </Link>
             ))}
             <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-              <Link to="/Login" onClick={() => setOpen(false)} className="btn-secondary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center" }}>Connexion</Link>
-              <Link to="/Register" onClick={() => setOpen(false)} className="btn-primary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center" }}>Inscription</Link>
+              {user ? (
+                <>
+                  <Link to="/messages" onClick={() => setOpen(false)} className="btn-secondary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center", position: "relative" }}>
+                    Messages {unread > 0 && `(${unread})`}
+                  </Link>
+                  <button onClick={() => { setOpen(false); handleLogout(); }} className="btn-primary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center", background: "var(--secondary)" }}>
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/Login" onClick={() => setOpen(false)} className="btn-secondary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center" }}>Connexion</Link>
+                  <Link to="/Register" onClick={() => setOpen(false)} className="btn-primary" style={{ flex: 1, height: 48, lineHeight: "48px", fontSize: 14, textAlign: "center" }}>Inscription</Link>
+                </>
+              )}
             </div>
           </div>
         )}

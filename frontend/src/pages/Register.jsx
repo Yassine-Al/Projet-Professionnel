@@ -2,36 +2,83 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { axiosClient } from "../api/axios";
 
+const Field = ({ label, type = "text", placeholder, optional, value, onChange, error }) => (
+  <div>
+    <label className="form-label">
+      {label}
+      {optional && <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, marginLeft: 6, color: "var(--text-faint)", fontSize: 11 }}>(optionnel)</span>}
+    </label>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required={!optional}
+      className="input-field"
+      style={{ fontSize: 15, borderColor: error ? "var(--error)" : undefined }}
+    />
+    {error && (
+      <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--error)" }}>{error}</p>
+    )}
+  </div>
+);
+
 export default function Register() {
-  const [form, setForm] = useState({ name:"", email:"", password:"", password_confirmation:"" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [form, setForm] = useState({ name: "", last_name: "", email: "", phone: "", password: "", password_confirmation: "" });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const validate = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = "Le prénom est requis.";
+    if (!form.email.trim()) e.email = "L'email est requis.";
+    if (form.password.length < 8) e.password = "Minimum 8 caractères.";
+    if (!/[A-Z]/.test(form.password)) e.password = "Au moins une majuscule requise.";
+    if (!/[0-9]/.test(form.password)) e.password = "Au moins un chiffre requis.";
+    if (form.password !== form.password_confirmation) e.password_confirmation = "Les mots de passe ne correspondent pas.";
+    return e;
+  };
 
   const onSubmit = async e => {
     e.preventDefault();
-    if (form.password !== form.password_confirmation) { setError("Les mots de passe ne correspondent pas."); return; }
-    setLoading(true); setError("");
+    const clientErrors = validate();
+    if (Object.keys(clientErrors).length) { setErrors(clientErrors); return; }
+    setLoading(true);
+    setErrors({});
     try {
-      await axiosClient.post("/register", form);
-      navigate("/Login");
+      const res = await axiosClient.post("/register", form);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const isAdmin = res.data.user?.role === "admin";
+      navigate(isAdmin ? "/admin" : "/", { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || "Inscription échouée. Réessayez.");
-    } finally { setLoading(false); }
+      if (!err.response) {
+        setErrors({
+          general: `Impossible de joindre le serveur (${import.meta.env.VITE_BACKEND_URL || "API"}). Vérifiez que le backend Laravel tourne, et ouvrez le site via http://localhost:3000 (pas 127.0.0.1).`,
+        });
+        return;
+      }
+      const data = err.response.data;
+      if (data?.errors) {
+        const mapped = {};
+        Object.entries(data.errors).forEach(([k, msgs]) => { mapped[k] = msgs[0]; });
+        setErrors(mapped);
+      } else {
+        setErrors({ general: data?.message || "Inscription échouée. Réessayez." });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const Field = ({ label, k, type="text", placeholder }) => (
-    <div>
-      <label className="form-label">{label}</label>
-      <input type={type} value={form[k]} onChange={set(k)} placeholder={placeholder} required
-        className="input-field" style={{ fontSize: 15 }}/>
-    </div>
-  );
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-off)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
       <div style={{ width: "100%", maxWidth: 520 }} className="anim-up">
+
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <Link to="/" style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
@@ -45,33 +92,89 @@ export default function Register() {
               ocazz<span style={{ color: "var(--accent-blue)" }}>.ma</span>
             </span>
           </Link>
-          <p style={{ color: "var(--text-muted)", fontSize: 15, marginTop: 8, marginBottom: 0 }}>Créez votre compte gratuitement</p>
+          <p style={{ color: "var(--text-muted)", fontSize: 15, marginTop: 8, marginBottom: 0 }}>
+            Créez votre compte gratuitement
+          </p>
         </div>
 
         {/* Card */}
         <div style={{ background: "var(--bg-white)", border: "1px solid var(--border)", padding: "40px 36px" }}>
-          {error && (
+          {errors.general && (
             <div style={{ background: "#FFF5F5", border: "1px solid var(--error)", borderLeft: "4px solid var(--error)", padding: "12px 16px", marginBottom: 20, display: "flex", gap: 10, alignItems: "center" }}>
-              <svg width="16" height="16" fill="none" stroke="var(--error)" viewBox="0 0 24 24" strokeWidth={2} style={{ flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span style={{ color: "var(--error)", fontSize: 14 }}>{error}</span>
+              <svg width="16" height="16" fill="none" stroke="var(--error)" viewBox="0 0 24 24" strokeWidth={2} style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span style={{ color: "var(--error)", fontSize: 14 }}>{errors.general}</span>
             </div>
           )}
 
           <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <Field label="Nom complet" k="name" placeholder="Mohamed Alami"/>
-            <Field label="Adresse email" k="email" type="email" placeholder="votre@email.ma"/>
-            <Field label="Mot de passe" k="password" type="password" placeholder="Minimum 8 caractères"/>
-            <Field label="Confirmer le mot de passe" k="password_confirmation" type="password" placeholder="Répéter le mot de passe"/>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <Field label="Prénom" value={form.name} onChange={set("name")} error={errors.name} placeholder="Mohamed" />
+              <Field label="Nom" value={form.last_name} onChange={set("last_name")} error={errors.last_name} placeholder="Alami" />
+            </div>
+            <Field label="Adresse email" type="email" value={form.email} onChange={set("email")} error={errors.email} placeholder="votre@email.ma" />
+            <Field label="Téléphone" type="tel" value={form.phone} onChange={set("phone")} placeholder="+212 6XX XXX XXX" optional />
 
-            {/* Password strength hint */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label className="form-label">Mot de passe</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={form.password}
+                    onChange={set("password")}
+                    placeholder="Minimum 8 caractères"
+                    required
+                    className="input-field"
+                    style={{ fontSize: 15, paddingRight: 40, borderColor: errors.password ? "var(--error)" : undefined }}
+                  />
+                  <button type="button" onClick={() => setShowPassword(v => !v)}
+                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", display: "flex", alignItems: "center" }}
+                    aria-label={showPassword ? "Masquer" : "Afficher"}>
+                    {showPassword
+                      ? <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                      : <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    }
+                  </button>
+                </div>
+                {errors.password && <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--error)" }}>{errors.password}</p>}
+              </div>
+              <div>
+                <label className="form-label">Confirmer</label>
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={form.password_confirmation}
+                    onChange={set("password_confirmation")}
+                    placeholder="Répéter"
+                    required
+                    className="input-field"
+                    style={{ fontSize: 15, paddingRight: 40, borderColor: errors.password_confirmation ? "var(--error)" : undefined }}
+                  />
+                  <button type="button" onClick={() => setShowPassword(v => !v)}
+                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0, color: "#999", display: "flex", alignItems: "center" }}
+                    aria-label={showPassword ? "Masquer" : "Afficher"}>
+                    {showPassword
+                      ? <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                      : <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    }
+                  </button>
+                </div>
+                {errors.password_confirmation && <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--error)" }}>{errors.password_confirmation}</p>}
+              </div>
+            </div>
+
             <p style={{ color: "var(--text-faint)", fontSize: 12, margin: 0, background: "var(--bg-off)", padding: "10px 14px" }}>
-              Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.
+              Minimum 8 caractères, une majuscule et un chiffre.
             </p>
 
             <button type="submit" disabled={loading} className="btn-primary" style={{ width: "100%", marginTop: 4 }}>
               {loading ? (
                 <span style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="anim-spin"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="anim-spin">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                  </svg>
                   Création…
                 </span>
               ) : "Créer mon compte"}

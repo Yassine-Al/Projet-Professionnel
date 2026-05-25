@@ -9,7 +9,12 @@
       "Bash(git checkout *)",
       "Bash(git add *)",
       "Bash(git rm *)",
-      "Bash(git commit -m 'merge: integrate origin/frontend/prediction \\(History B\\) — kept stable-app backend, added Flask prediction API *)"
+      "Bash(git commit -m 'merge: integrate origin/frontend/prediction \\(History B\\) — kept stable-app backend, added Flask prediction API *)",
+      "Bash(curl -sv -X POST http://localhost:8000/api/register -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"name\":\"Test User\",\"email\":\"testuser123@example.com\",\"password\":\"Password1\",\"password_confirmation\":\"Password1\"}'33)",
+      "Bash(curl -s -X POST http://localhost:8000/api/register -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"name\":\"Test User\",\"email\":\"testuser123@example.com\",\"password\":\"Password1\",\"password_confirmation\":\"Password1\"}')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('message',''\\)\\)\")",
+      "Bash(curl -si -X POST http://localhost:8000/api/register -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"name\":\"Test User\",\"email\":\"testuser123@example.com\",\"password\":\"Password1\",\"password_confirmation\":\"Password1\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/register -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{\"name\":\"Test User\",\"email\":\"testuser999@example.com\",\"password\":\"Password1\",\"password_confirmation\":\"Password1\"}')"
     ]
   }
 }

@@ -1,7 +1,8 @@
 import Formlogin from "../components/Formlogin";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 export default function Login() {
+  const [params] = useSearchParams();
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-off)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
       <div style={{ width: "100%", maxWidth: 480 }} className="anim-up">
@@ -23,6 +24,14 @@ export default function Login() {
 
         {/* Card */}
         <div style={{ background: "var(--bg-white)", border: "1px solid var(--border)", padding: "40px 36px" }}>
+          {params.get("reset") === "1" && (
+            <div style={{ background: "#E8F5E9", border: "1px solid var(--success)", borderLeft: "4px solid var(--success)", padding: "12px 16px", marginBottom: 20, display: "flex", gap: 10, alignItems: "center" }}>
+              <svg width="16" height="16" fill="none" stroke="var(--success)" viewBox="0 0 24 24" strokeWidth={2} style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span style={{ color: "#1B5E20", fontSize: 14 }}>Mot de passe réinitialisé avec succès. Connectez-vous.</span>
+            </div>
+          )}
           <Formlogin />
           <div style={{ marginTop: 24, paddingTop: 24, borderTop: "1px solid var(--bg-off)", textAlign: "center" }}>
             <p style={{ color: "var(--text-muted)", fontSize: 14, margin: 0 }}>

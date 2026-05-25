@@ -4,6 +4,8 @@ use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmailVerificationController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\AnnonceController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\FavoriteController;
@@ -23,6 +25,15 @@ use App\Http\Controllers\UserController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Password reset
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+
+// Email verification (no auth — user clicks link directly from email)
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('api.verification.verify');
+
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (Sanctum)
@@ -41,6 +52,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/user', [UserController::class, 'destroy']);
 
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Resend email verification
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1');
 
     /*
     |--------------------------------------------------------------------------
