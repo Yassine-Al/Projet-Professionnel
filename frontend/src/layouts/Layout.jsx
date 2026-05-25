@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { axiosClient } from "../api/axios";
+import ChatWidget from "../components/ChatWidget";
 
 const NAV = [
   { label: "Accueil",              path: "/" },
@@ -184,6 +185,8 @@ export default function Layout() {
 
       {/* ── Page Content ── */}
       <main style={{ flex: 1 }}><Outlet /></main>
+
+      <ChatWidget />
 
       {/* ── Footer ── */}
       <footer style={{ background: "var(--bg-dark)", color: "#fff", paddingTop: 60, paddingBottom: 40 }}>

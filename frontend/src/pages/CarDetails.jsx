@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { axiosClient } from "../api/axios";
 
@@ -31,16 +31,117 @@ function Skeleton() {
   );
 }
 
+function Lightbox({ imgs, index, onClose, onPrev, onNext }) {
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === "Escape")     onClose();
+      if (e.key === "ArrowLeft")  onPrev();
+      if (e.key === "ArrowRight") onNext();
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose, onPrev, onNext]);
+
+  return (
+    <div
+      onClick={onClose}
+      style={{ position:"fixed", inset:0, zIndex:2000, background:"rgba(0,0,0,0.93)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center" }}
+    >
+      {/* Close */}
+      <button
+        onClick={onClose}
+        style={{ position:"absolute", top:18, right:22, background:"none", border:"none", color:"#fff", cursor:"pointer", padding:8, lineHeight:1 }}
+      >
+        <svg width="28" height="28" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      {/* Counter */}
+      <p style={{ position:"absolute", top:24, left:28, color:"rgba(255,255,255,0.7)", fontSize:14, margin:0, fontFamily:"Manrope,sans-serif" }}>
+        {index + 1} / {imgs.length}
+      </p>
+
+      {/* Main image */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", width:"100%", padding:"60px 80px 16px", boxSizing:"border-box", position:"relative" }}
+      >
+        <img
+          src={imgs[index]}
+          referrerPolicy="no-referrer"
+          alt=""
+          style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain", userSelect:"none" }}
+        />
+
+        {/* Prev */}
+        {imgs.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); onPrev(); }}
+            style={{ position:"absolute", left:8, top:"50%", transform:"translateY(-50%)", width:48, height:48, background:"rgba(255,255,255,0.15)", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", transition:"background 0.15s" }}
+            onMouseOver={e => e.currentTarget.style.background="rgba(255,255,255,0.28)"}
+            onMouseOut={e => e.currentTarget.style.background="rgba(255,255,255,0.15)"}
+          >
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+        )}
+
+        {/* Next */}
+        {imgs.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); onNext(); }}
+            style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", width:48, height:48, background:"rgba(255,255,255,0.15)", border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", transition:"background 0.15s" }}
+            onMouseOver={e => e.currentTarget.style.background="rgba(255,255,255,0.28)"}
+            onMouseOut={e => e.currentTarget.style.background="rgba(255,255,255,0.15)"}
+          >
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        )}
+      </div>
+
+      {/* Thumbnail strip */}
+      {imgs.length > 1 && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{ display:"flex", gap:6, padding:"0 20px 20px", overflowX:"auto", maxWidth:"100%", flexShrink:0 }}
+        >
+          {imgs.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => onNext(i)}
+              style={{
+                width:72, height:52, padding:0, flexShrink:0, border: i === index ? "2px solid #fff" : "2px solid rgba(255,255,255,0.2)",
+                cursor:"pointer", overflow:"hidden", opacity: i === index ? 1 : 0.5, transition:"opacity 0.15s, border-color 0.15s",
+              }}
+            >
+              <img src={src} referrerPolicy="no-referrer" alt="" style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [car, setCar]           = useState(null);
   const [loading, setLoading]   = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [activeImg, setActiveImg] = useState(0);
+  const [activeImg, setActiveImg]   = useState(0);
+  const [lightbox, setLightbox]     = useState(false);
   const [msg, setMsg]           = useState("");
   const [sent, setSent]         = useState(false);
   const [sending, setSending]   = useState(false);
+
+  const lbPrev  = useCallback(() => setActiveImg(i => (i - 1 + (car?.images?.length ?? 1)) % (car?.images?.length ?? 1)), [car]);
+  const lbNext  = useCallback((i) => setActiveImg(typeof i === "number" ? i : prev => (prev + 1) % (car?.images?.length ?? 1)), [car]);
+  const lbClose = useCallback(() => setLightbox(false), []);
 
   useEffect(() => {
     setLoading(true);
@@ -117,11 +218,15 @@ export default function CarDetails() {
             <div style={{ border:"1px solid var(--border)", marginBottom:24 }}>
               {imgs.length > 0 ? (
                 <>
-                  <div style={{ position:"relative", height:420, overflow:"hidden", background:"var(--bg-off)" }}>
+                  <div style={{ position:"relative", height:420, overflow:"hidden", background:"var(--bg-off)", cursor:"zoom-in" }}
+                    onClick={() => setLightbox(true)}>
                     <img src={imgs[activeImg]} alt={`${car.brand} ${car.model}`}
                       referrerPolicy="no-referrer"
                       style={{ width:"100%", height:"100%", objectFit:"cover" }}/>
-                    <div style={{ position:"absolute", bottom:12, right:12, background:"rgba(0,0,0,0.6)", color:"#fff", fontSize:12, padding:"4px 10px", fontFamily:"Manrope,sans-serif" }}>
+                    <div style={{ position:"absolute", bottom:12, right:12, background:"rgba(0,0,0,0.6)", color:"#fff", fontSize:12, padding:"4px 10px", fontFamily:"Manrope,sans-serif", display:"flex", alignItems:"center", gap:6 }}>
+                      <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>
+                      </svg>
                       {activeImg+1} / {imgs.length}
                     </div>
                     {imgs.length > 1 && <>
@@ -238,6 +343,10 @@ export default function CarDetails() {
       </div>
 
       <style>{`@media(max-width:767px){.details-grid{grid-template-columns:1fr !important;}}`}</style>
+
+      {lightbox && imgs.length > 0 && (
+        <Lightbox imgs={imgs} index={activeImg} onClose={lbClose} onPrev={lbPrev} onNext={lbNext} />
+      )}
     </div>
   );
 }

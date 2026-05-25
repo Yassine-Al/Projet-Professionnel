@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
@@ -37,6 +38,10 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 // Public annonce browsing (no auth required)
 Route::get('annonces', [AnnonceController::class, 'index']);
 Route::get('annonces/{annonce}', [AnnonceController::class, 'show']);
+
+// AI chatbot (public — guests can use it too)
+Route::post('chat', [ChatController::class, 'chat']);
+Route::post('chat/stream', [ChatController::class, 'stream']);
 
 /*
 |--------------------------------------------------------------------------
