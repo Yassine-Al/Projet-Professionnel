@@ -2,14 +2,39 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 const API = `${import.meta.env.VITE_BACKEND_URL}/api/chat/stream`;
-const WELCOME = { role: "model", text: "Bonjour ! Je suis l'assistant ocazz.ma.\nComment puis-je vous aider ?" };
+const WELCOME = { role: "model", text: "Bonjour ! Je suis l'assistant ocazz.ma.\nComment puis-je vous aider aujourd'hui ?" };
+
+function BotAvatar({ size = 28 }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      background: "linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <svg width={size * 0.52} height={size * 0.52} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+      </svg>
+    </div>
+  );
+}
 
 function TypingDots() {
   return (
-    <div style={{ display: "inline-flex", gap: 5, alignItems: "center", padding: "10px 14px", background: "var(--bg-off)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)" }}>
-      {[0, 1, 2].map(i => (
-        <span key={i} style={{ width: 6, height: 6, background: "var(--text-faint)", borderRadius: "50%", display: "inline-block", animation: `dot-bounce 1.2s ${i * 0.18}s infinite ease-in-out` }} />
-      ))}
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+      <BotAvatar size={26} />
+      <div style={{
+        display: "inline-flex", gap: 5, alignItems: "center",
+        padding: "11px 15px", background: "#fff", borderRadius: "16px 16px 16px 4px",
+        border: "1px solid #E2E8F0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+      }}>
+        {[0, 1, 2].map(i => (
+          <span key={i} style={{
+            width: 6, height: 6, background: "#94A3B8", borderRadius: "50%",
+            display: "inline-block",
+            animation: `dot-bounce 1.2s ${i * 0.2}s infinite ease-in-out`,
+          }} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -21,16 +46,21 @@ export default function ChatWidget() {
   const [msgs, setMsgs]           = useState([WELCOME]);
   const [input, setInput]         = useState("");
   const [streaming, setStreaming] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef  = useRef(null);
-  const abortRef  = useRef(null);
+  const msgsRef  = useRef(null);
+  const inputRef = useRef(null);
+  const abortRef = useRef(null);
 
   useEffect(() => {
     if (open) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      setTimeout(() => inputRef.current?.focus(), 120);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [open, msgs.length]);
+  }, [open]);
+
+  useEffect(() => {
+    if (msgsRef.current) {
+      msgsRef.current.scrollTop = msgsRef.current.scrollHeight;
+    }
+  }, [msgs]);
 
   const send = async () => {
     const text = input.trim();
@@ -107,51 +137,68 @@ export default function ChatWidget() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
+  const clearChat = () => {
+    if (streaming) { abortRef.current?.abort(); setStreaming(false); }
+    setMsgs([WELCOME]);
+    setInput("");
+  };
+
   const lastMsg = msgs[msgs.length - 1];
   const awaitingFirst = streaming && lastMsg?.role === "model" && lastMsg?.text === "";
+  const canSend = input.trim().length > 0 && !streaming;
 
   return (
     <>
       <style>{`
         @keyframes dot-bounce {
-          0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
-          40%            { transform: translateY(-4px); opacity: 1; }
-        }
-        .chat-window {
-          animation: chat-slide-up 0.22s cubic-bezier(0.22,1,0.36,1);
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          40%            { transform: translateY(-5px); opacity: 1; }
         }
         @keyframes chat-slide-up {
-          from { opacity: 0; transform: translateY(14px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+          from { opacity: 0; transform: translateY(16px) scale(0.96); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .chat-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(37,99,235,0.4) !important; }
+        @keyframes btn-pulse {
+          0%, 100% { box-shadow: 0 4px 16px rgba(59,130,246,0.4); }
+          50%       { box-shadow: 0 4px 28px rgba(59,130,246,0.65); }
+        }
+        .chat-fab { animation: btn-pulse 2.8s ease-in-out infinite; }
+        .chat-fab:hover { transform: scale(1.1) !important; }
+        .chat-fab.is-open { animation: none; }
+        .chat-window { animation: chat-slide-up 0.24s cubic-bezier(0.22,1,0.36,1); }
+        .chat-msgs::-webkit-scrollbar { width: 4px; }
+        .chat-msgs::-webkit-scrollbar-track { background: transparent; }
+        .chat-msgs::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+        .chat-input:focus { border-color: #3B82F6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important; }
       `}</style>
 
       {/* Floating button */}
       <button
-        className="chat-btn"
+        className={`chat-fab${open ? " is-open" : ""}`}
         onClick={() => setOpen(o => !o)}
         title="Assistant ocazz.ma"
         style={{
           position: "fixed", bottom: btnBottom, right: 28, zIndex: 1000,
-          transition: "background 0.18s, transform 0.18s, box-shadow 0.18s, bottom 0.2s",
           width: 56, height: 56,
-          background: open ? "var(--secondary)" : "var(--accent-blue)",
-          border: "none", cursor: "pointer",
-          borderRadius: "50%",
+          background: open
+            ? "linear-gradient(135deg, #475569 0%, #334155 100%)"
+            : "linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)",
+          border: "none", cursor: "pointer", borderRadius: "50%",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 4px 16px rgba(37,99,235,0.35)",
+          transition: "background 0.2s, transform 0.18s, bottom 0.22s",
         }}
       >
-        {open ? (
-          <svg width="18" height="18" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        ) : (
-          <svg width="22" height="22" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={1.8}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-          </svg>
-        )}
+        <div style={{ transition: "transform 0.22s, opacity 0.18s", transform: open ? "rotate(90deg)" : "rotate(0deg)" }}>
+          {open ? (
+            <svg width="18" height="18" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          ) : (
+            <svg width="23" height="23" fill="none" stroke="#fff" viewBox="0 0 24 24" strokeWidth={1.7}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+          )}
+        </div>
       </button>
 
       {/* Chat window */}
@@ -160,59 +207,101 @@ export default function ChatWidget() {
           className="chat-window"
           style={{
             position: "fixed", bottom: btnBottom + 68, right: 28, zIndex: 999,
-            width: 360, height: 520,
-            background: "var(--bg-white)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-xl)",
+            width: 370, height: 540,
+            background: "#fff",
+            borderRadius: 20,
+            boxShadow: "0 24px 64px rgba(0,0,0,0.18), 0 4px 20px rgba(0,0,0,0.1)",
             display: "flex", flexDirection: "column",
             overflow: "hidden",
           }}
         >
           {/* Header */}
           <div style={{
-            padding: "14px 18px",
-            background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-hover) 100%)",
-            display: "flex", alignItems: "center", gap: 12, flexShrink: 0,
+            padding: "14px 16px",
+            background: "linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%)",
+            display: "flex", alignItems: "center", gap: 11, flexShrink: 0,
           }}>
-            <div style={{ width: 38, height: 38, background: "rgba(255,255,255,0.18)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/>
-                <circle cx="7.5" cy="14.5" r="1.5"/><circle cx="16.5" cy="14.5" r="1.5"/>
+            {/* Bot avatar in header */}
+            <div style={{
+              width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
+              background: "rgba(255,255,255,0.15)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: "2px solid rgba(255,255,255,0.25)",
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
               </svg>
             </div>
+
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontFamily: "Manrope,sans-serif", fontWeight: 700, fontSize: 14, color: "#fff", letterSpacing: "-0.01em" }}>Assistant ocazz.ma</p>
+              <p style={{ margin: 0, fontFamily: "Manrope,sans-serif", fontWeight: 800, fontSize: 14.5, color: "#fff", letterSpacing: "-0.02em" }}>
+                Assistant ocazz.ma
+              </p>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
-                <span style={{ width: 6, height: 6, background: "#4ADE80", borderRadius: "50%", flexShrink: 0 }} />
-                <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>En ligne · Gemini AI</p>
+                <span style={{ width: 7, height: 7, background: "#4ADE80", borderRadius: "50%", flexShrink: 0, boxShadow: "0 0 6px rgba(74,222,128,0.8)" }} />
+                <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.65)", fontWeight: 500 }}>En ligne</p>
               </div>
             </div>
+
+            {/* Clear button */}
+            {msgs.length > 1 && (
+              <button
+                onClick={clearChat}
+                title="Effacer la conversation"
+                style={{
+                  background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: 8, padding: "5px 8px", cursor: "pointer",
+                  color: "rgba(255,255,255,0.75)", fontSize: 11, fontFamily: "Manrope,sans-serif",
+                  fontWeight: 600, display: "flex", alignItems: "center", gap: 4,
+                  transition: "background 0.15s",
+                  flexShrink: 0,
+                }}
+                onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.22)"}
+                onMouseOut={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}
+              >
+                <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4l16 16M4 20L20 4"/>
+                </svg>
+                Effacer
+              </button>
+            )}
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px 14px 8px", display: "flex", flexDirection: "column", gap: 8, background: "var(--bg-off)" }}>
+          <div
+            ref={msgsRef}
+            className="chat-msgs"
+            style={{
+              flex: 1, overflowY: "auto", padding: "16px 14px 10px",
+              display: "flex", flexDirection: "column", gap: 10,
+              background: "#F8FAFC",
+            }}
+          >
             {msgs.map((m, i) => {
               const isUser  = m.role === "user";
               const isError = m.role === "error";
               const isEmpty = m.role === "model" && m.text === "" && i === msgs.length - 1 && awaitingFirst;
               if (isEmpty) return null;
               return (
-                <div key={i} style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start" }}>
+                <div key={i} style={{ display: "flex", flexDirection: isUser ? "row-reverse" : "row", alignItems: "flex-end", gap: 7 }}>
+                  {!isUser && <BotAvatar size={26} />}
                   <div style={{
-                    maxWidth: "78%",
-                    padding: "9px 13px",
-                    fontSize: 13.5, lineHeight: "20px",
+                    maxWidth: "76%",
+                    padding: "10px 14px",
+                    fontSize: 13.5, lineHeight: "21px",
                     whiteSpace: "pre-wrap",
-                    borderRadius: isUser ? "var(--radius-md) var(--radius-md) 4px var(--radius-md)" : "var(--radius-md) var(--radius-md) var(--radius-md) 4px",
+                    borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
                     background: isUser
-                      ? "var(--accent-blue)"
+                      ? "linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)"
                       : isError
-                        ? "rgba(239,68,68,0.08)"
-                        : "var(--bg-white)",
-                    color: isUser ? "#fff" : isError ? "var(--error)" : "var(--text-primary)",
-                    border: isUser ? "none" : `1px solid ${isError ? "rgba(239,68,68,0.2)" : "var(--border)"}`,
-                    boxShadow: isUser ? "none" : "var(--shadow-xs)",
+                        ? "#FEF2F2"
+                        : "#fff",
+                    color: isUser ? "#fff" : isError ? "#DC2626" : "#1E293B",
+                    border: isUser ? "none" : `1px solid ${isError ? "#FECACA" : "#E2E8F0"}`,
+                    boxShadow: isUser
+                      ? "0 2px 10px rgba(99,102,241,0.3)"
+                      : "0 1px 3px rgba(0,0,0,0.05)",
+                    fontFamily: "inherit",
                   }}>
                     {m.text}
                   </div>
@@ -220,36 +309,58 @@ export default function ChatWidget() {
               );
             })}
 
-            {awaitingFirst && (
-              <div style={{ display: "flex", justifyContent: "flex-start" }}>
-                <TypingDots />
-              </div>
-            )}
-
-            <div ref={bottomRef} />
+            {awaitingFirst && <TypingDots />}
           </div>
 
           {/* Input */}
-          <div style={{ padding: "10px 12px", borderTop: "1px solid var(--border)", display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0, background: "var(--bg-white)" }}>
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKey}
-              placeholder="Posez votre question…"
-              className="textarea-field"
-              style={{ flex: 1, minHeight: 40, maxHeight: 96, resize: "none", fontSize: 13, padding: "9px 12px", lineHeight: "18px", borderRadius: "var(--radius-sm)" }}
-            />
-            <button
-              onClick={send}
-              disabled={!input.trim() || streaming}
-              className="btn-primary"
-              style={{ width: 40, height: 40, padding: 0, flexShrink: 0, borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-              </svg>
-            </button>
+          <div style={{
+            padding: "10px 12px 12px",
+            background: "#fff",
+            borderTop: "1px solid #F1F5F9",
+          }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKey}
+                placeholder="Posez votre question…"
+                className="chat-input"
+                style={{
+                  flex: 1, minHeight: 42, maxHeight: 100, resize: "none",
+                  fontSize: 13.5, padding: "10px 13px", lineHeight: "20px",
+                  border: "1.5px solid #E2E8F0", borderRadius: 12,
+                  background: "#F8FAFC", fontFamily: "inherit", color: "#1E293B",
+                  outline: "none", transition: "border-color 0.15s, box-shadow 0.15s",
+                }}
+              />
+              <button
+                onClick={send}
+                disabled={!canSend}
+                style={{
+                  width: 42, height: 42, padding: 0, flexShrink: 0,
+                  borderRadius: 12, border: "none",
+                  cursor: canSend ? "pointer" : "default",
+                  background: canSend
+                    ? "linear-gradient(135deg, #3B82F6 0%, #6366F1 100%)"
+                    : "#E2E8F0",
+                  color: canSend ? "#fff" : "#94A3B8",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 0.15s, box-shadow 0.15s, transform 0.12s",
+                  boxShadow: canSend ? "0 2px 10px rgba(99,102,241,0.35)" : "none",
+                  transform: "scale(1)",
+                }}
+                onMouseOver={e => { if (canSend) e.currentTarget.style.transform = "scale(1.07)"; }}
+                onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+              </button>
+            </div>
+            <p style={{ margin: "7px 0 0", fontSize: 10.5, color: "#CBD5E1", textAlign: "center" }}>
+              Entrée pour envoyer · Maj+Entrée pour sauter une ligne
+            </p>
           </div>
         </div>
       )}
